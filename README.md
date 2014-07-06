@@ -1,7 +1,6 @@
-ifstatistics
+snmpqueries
 ============
 
-ifstatistics
 
 
 go get github.com/soniah/gosnmp
