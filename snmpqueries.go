@@ -5,35 +5,16 @@ import (
 	"math/rand"
 	"strconv"
 	"time"
+
+	"github.com/eferro/go-snmpqueries/pkg/snmpquery"
 )
 
-type Query struct {
-	Id          int
-	Query       string
-	Destination string
-}
-
-type QueryResponse struct {
-	Id       int
-	Response string
-	Query    Query
-}
-
-func handleQuery(query Query) QueryResponse {
-	time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
-	return QueryResponse{
-		Id:       query.Id,
-		Response: "whatever",
-		Query:    query,
-	}
-}
-
-func generateRandomQueries() <-chan Query {
-	out := make(chan Query, 100)
+func generateRandomQueries() <-chan snmpquery.Query {
+	out := make(chan snmpquery.Query, 100)
 	go func() {
 		queryId := 0
 		for {
-			query := Query{
+			query := snmpquery.Query{
 				Id:          queryId,
 				Query:       "Fake query " + strconv.Itoa(queryId),
 				Destination: "Fake destination " + strconv.Itoa(queryId),
@@ -50,10 +31,10 @@ func main() {
 
 	input := generateRandomQueries()
 
-	processed := make(chan QueryResponse, 100)
+	processed := make(chan snmpquery.QueryResponse, 100)
 	go func() {
 		for query := range input {
-			processed <- handleQuery(query)
+			processed <- snmpquery.HandleQuery(query)
 		}
 	}()
 
