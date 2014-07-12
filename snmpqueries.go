@@ -8,21 +8,33 @@ import (
 )
 
 type Query struct {
+	Id          int
 	Query       string
 	Destination string
 }
 
 type QueryResponse struct {
+	Id       int
 	Response string
 	Query    Query
 }
 
+func handleQuery(query Query) QueryResponse {
+	time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+	return QueryResponse{
+		Id:       query.Id,
+		Response: "whatever",
+		Query:    query,
+	}
+}
+
 func generateRandomQueries() <-chan Query {
-	out := make(chan Query)
+	out := make(chan Query, 100)
 	go func() {
 		queryId := 0
 		for {
 			query := Query{
+				Id:          queryId,
 				Query:       "Fake query " + strconv.Itoa(queryId),
 				Destination: "Fake destination " + strconv.Itoa(queryId),
 			}
@@ -37,7 +49,15 @@ func generateRandomQueries() <-chan Query {
 func main() {
 
 	input := generateRandomQueries()
-	for query := range input {
-		fmt.Println(query.Query)
+
+	processed := make(chan QueryResponse, 100)
+	go func() {
+		for query := range input {
+			processed <- handleQuery(query)
+		}
+	}()
+
+	for response := range processed {
+		fmt.Println(response.Query, response.Response)
 	}
 }
