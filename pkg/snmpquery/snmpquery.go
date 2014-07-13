@@ -2,6 +2,7 @@ package snmpquery
 
 import (
 	"math/rand"
+	"strconv"
 	"time"
 )
 
@@ -9,19 +10,11 @@ type Query struct {
 	Id          int
 	Query       string
 	Destination string
+	Response    string
+	Error       int
 }
 
-type QueryResponse struct {
-	Id       int
-	Response string
-	Query    Query
-}
-
-func HandleQuery(query Query) QueryResponse {
+func HandleQuery(query *Query) {
 	time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
-	return QueryResponse{
-		Id:       query.Id,
-		Response: "whatever",
-		Query:    query,
-	}
+	query.Response = "whatever " + strconv.Itoa(rand.Intn(1e3))
 }

@@ -10,7 +10,7 @@ import (
 )
 
 func generateRandomQueries() <-chan snmpquery.Query {
-	out := make(chan snmpquery.Query, 100)
+	out := make(chan snmpquery.Query)
 	go func() {
 		queryId := 0
 		for {
@@ -31,14 +31,15 @@ func main() {
 
 	input := generateRandomQueries()
 
-	processed := make(chan snmpquery.QueryResponse, 100)
+	processed := make(chan snmpquery.Query)
 	go func() {
 		for query := range input {
-			processed <- snmpquery.HandleQuery(query)
+			snmpquery.HandleQuery(&query)
+			processed <- query
 		}
 	}()
 
-	for response := range processed {
-		fmt.Println(response.Query, response.Response)
+	for query := range processed {
+		fmt.Println(query.Query, query.Response)
 	}
 }
