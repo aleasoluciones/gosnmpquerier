@@ -30,8 +30,8 @@ func printResults(processed chan snmpquery.Query) {
 }
 
 func main() {
-	input := make(chan snmpquery.Query)
-	processed := make(chan snmpquery.Query)
+	input := make(chan snmpquery.Query, 10)
+	processed := make(chan snmpquery.Query, 10)
 
 	go generateRandomQueries(input)
 	go snmpquery.Process(input, processed)
