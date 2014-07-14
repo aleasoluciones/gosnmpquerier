@@ -52,20 +52,6 @@ func Process(input chan Query, processed chan Query, conntention int) {
 	}
 }
 
-func printValue(pdu gosnmp.SnmpPDU) error {
-	fmt.Printf("%s = ", pdu.Name)
-
-	switch pdu.Type {
-	case gosnmp.OctetString:
-		fmt.Printf("STRING: %s\n", pdu.Value.(string))
-	case gosnmp.Counter64:
-		fmt.Printf("COUNTER64 %d: %d\n", pdu.Type, gosnmp.ToBigInt(pdu.Value))
-	default:
-		fmt.Printf("TYPE %d: %d\n", pdu.Type, gosnmp.ToBigInt(pdu.Value))
-	}
-	return nil
-}
-
 func handleQuery(query *Query) {
 
 	gosnmp.Default.Community = query.Community
@@ -78,10 +64,29 @@ func handleQuery(query *Query) {
 	}
 	defer gosnmp.Default.Conn.Close()
 
-	err = gosnmp.Default.BulkWalk(query.Oid, printValue)
+	output := make(chan string, 10)
+
+	fn := func(pdu gosnmp.SnmpPDU) error {
+		out := pdu.Name
+
+		switch pdu.Type {
+		case gosnmp.OctetString:
+			out += "STRING "
+		case gosnmp.Counter64:
+			out += "COUNTER64 "
+		}
+		output <- out
+		return nil
+	}
+
+	err = gosnmp.Default.BulkWalk(query.Oid, fn)
 	if err != nil {
 		fmt.Printf("Walk Error: %v\n", err)
 		return
+	}
+
+	for result := range output {
+		fmt.Println("EFA", result)
 	}
 
 	query.Response = "whatever " + strconv.Itoa(rand.Intn(1e3))
