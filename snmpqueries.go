@@ -15,7 +15,7 @@ func generateRandomQueries(input chan snmpquery.Query) {
 		query := snmpquery.Query{
 			Id:          queryId,
 			Query:       "Fake query " + strconv.Itoa(queryId),
-			Destination: "Fake destination " + strconv.Itoa(queryId),
+			Destination: "Fake destination " + strconv.Itoa(rand.Intn(10)),
 		}
 		input <- query
 		queryId += 1
@@ -25,7 +25,7 @@ func generateRandomQueries(input chan snmpquery.Query) {
 
 func printResults(processed chan snmpquery.Query) {
 	for query := range processed {
-		fmt.Println(query.Query, query.Response)
+		fmt.Println(query.Destination, query.Query, query.Response)
 	}
 }
 

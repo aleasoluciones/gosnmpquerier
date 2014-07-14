@@ -1,6 +1,7 @@
 package snmpquery
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
@@ -19,10 +20,28 @@ func HandleQuery(query *Query) {
 	query.Response = "whatever " + strconv.Itoa(rand.Intn(1e3))
 }
 
+func ProcessQueriesFromChannel(input chan Query, processed chan Query) {
+	for query := range input {
+		HandleQuery(&query)
+		fmt.Println("Processed", query)
+		processed <- query
+	}
+}
+
 func Process(input chan Query, processed chan Query) {
+	m := make(map[string]chan Query)
+
 	for query := range input {
 
-		HandleQuery(&query)
-		processed <- query
+		channel, exists := m[query.Destination]
+		if exists == false {
+			channel := make(chan Query)
+			m[query.Destination] = channel
+			fmt.Println("EFA creating a go routine for ", query.Destination)
+			go ProcessQueriesFromChannel(channel, processed)
+		}
+
+		channel <- query
+
 	}
 }
