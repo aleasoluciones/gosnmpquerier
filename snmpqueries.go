@@ -1,10 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
-	"math/rand"
-	"strconv"
-	"time"
+	"log"
+	"os"
+	"strings"
 
 	"github.com/eferro/go-snmpqueries/pkg/snmpquery"
 )
@@ -13,23 +14,40 @@ const (
 	CONTENTION = 4
 )
 
-func generateRandomQueries(input chan snmpquery.Query) {
+func readQueriesFromStdin(input chan snmpquery.Query) {
+	reader := bufio.NewReader(os.Stdin)
 	queryId := 0
 	for {
-		query := snmpquery.Query{
-			Id:          queryId,
-			Query:       "Fake query " + strconv.Itoa(queryId),
-			Destination: "Destination " + strconv.Itoa(rand.Intn(3)),
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			break
 		}
-		input <- query
-		queryId += 1
-		time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+
+		fields := strings.Fields(line)
+		if len(fields) != 4 {
+			log.Println("InvalidLine", line)
+		} else {
+			var cmd snmpquery.OpSnmp
+			switch fields[0] {
+			case "walk":
+				cmd = snmpquery.WALK
+			case "get":
+				cmd = snmpquery.GET
+			default:
+				log.Println("InvalidLine", line)
+				continue
+			}
+
+			query := snmpquery.NewQuery(queryId, cmd, fields[1], fields[2], fields[3])
+			input <- *query
+			queryId += 1
+		}
 	}
 }
 
 func printResults(processed chan snmpquery.Query) {
 	for query := range processed {
-		fmt.Println(query.Destination, query.Query, query.Response)
+		fmt.Println(query)
 	}
 }
 
@@ -37,7 +55,7 @@ func main() {
 	input := make(chan snmpquery.Query, 10)
 	processed := make(chan snmpquery.Query, 10)
 
-	go generateRandomQueries(input)
+	go readQueriesFromStdin(input)
 	go snmpquery.Process(input, processed, CONTENTION)
 
 	printResults(processed)

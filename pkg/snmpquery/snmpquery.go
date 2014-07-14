@@ -6,12 +6,31 @@ import (
 	"time"
 )
 
+type OpSnmp int32
+
+const (
+	GET  = 0
+	WALK = 1
+)
+
 type Query struct {
 	Id          int
-	Query       string
+	Cmd         OpSnmp
+	Community   string
+	Oid         string
 	Destination string
 	Response    string
 	Error       int
+}
+
+func NewQuery(id int, cmd OpSnmp, destination, community, oid string) *Query {
+	return &Query{
+		Id:          id,
+		Cmd:         cmd,
+		Community:   community,
+		Oid:         oid,
+		Destination: destination,
+	}
 }
 
 func Process(input chan Query, processed chan Query, conntention int) {
