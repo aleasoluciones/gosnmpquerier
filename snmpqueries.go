@@ -23,13 +23,6 @@ func generateRandomQueries(input chan snmpquery.Query) {
 	}
 }
 
-func processQueries(input chan snmpquery.Query, processed chan snmpquery.Query) {
-	for query := range input {
-		snmpquery.HandleQuery(&query)
-		processed <- query
-	}
-}
-
 func printResults(processed chan snmpquery.Query) {
 	for query := range processed {
 		fmt.Println(query.Query, query.Response)
@@ -41,7 +34,7 @@ func main() {
 	processed := make(chan snmpquery.Query)
 
 	go generateRandomQueries(input)
-	go processQueries(input, processed)
+	go snmpquery.Process(input, processed)
 
 	printResults(processed)
 }
