@@ -21,6 +21,7 @@ func HandleQuery(query *Query) {
 }
 
 func ProcessQueriesFromChannel(input chan Query, processed chan Query) {
+	fmt.Println("Process queries from channel", input)
 	for query := range input {
 		fmt.Println("Begin processing", query)
 		HandleQuery(&query)
@@ -35,13 +36,19 @@ func Process(input chan Query, processed chan Query) {
 	for query := range input {
 		fmt.Println("EFA processing query ", query.Destination, query)
 
-		channel, exists := m[query.Destination]
+		_, exists := m[query.Destination]
 		if exists == false {
-			channel := make(chan Query, 10)
-			m[query.Destination] = channel
-			fmt.Println("EFA creating a go routine for ", query.Destination)
-			go ProcessQueriesFromChannel(channel, processed)
+			channel_tmp := make(chan Query, 10)
+			m[query.Destination] = channel_tmp
+			fmt.Println("EFA creating a go routine for ", query.Destination, channel_tmp)
+			go ProcessQueriesFromChannel(channel_tmp, processed)
 		}
+
+		if len(m) > 10 {
+			panic(fmt.Sprintf("Hay más de 10 hilos, ¿qué pasa?"))
+		}
+
+		channel, _ := m[query.Destination]
 		channel <- query
 
 	}
