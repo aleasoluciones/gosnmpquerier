@@ -1,9 +1,12 @@
 package snmpquery
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
+
+	"github.com/soniah/gosnmp"
 )
 
 type OpSnmp int32
@@ -49,8 +52,38 @@ func Process(input chan Query, processed chan Query, conntention int) {
 	}
 }
 
+func printValue(pdu gosnmp.SnmpPDU) error {
+	fmt.Printf("%s = ", pdu.Name)
+
+	switch pdu.Type {
+	case gosnmp.OctetString:
+		fmt.Printf("STRING: %s\n", pdu.Value.(string))
+	case gosnmp.Counter64:
+		fmt.Printf("COUNTER64 %d: %d\n", pdu.Type, gosnmp.ToBigInt(pdu.Value))
+	default:
+		fmt.Printf("TYPE %d: %d\n", pdu.Type, gosnmp.ToBigInt(pdu.Value))
+	}
+	return nil
+}
+
 func handleQuery(query *Query) {
-	time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+
+	gosnmp.Default.Community = query.Community
+	gosnmp.Default.Target = query.Destination
+	gosnmp.Default.Timeout = time.Duration(10 * time.Second)
+	err := gosnmp.Default.Connect()
+	if err != nil {
+		fmt.Printf("Connect err: %v\n", err)
+		return
+	}
+	defer gosnmp.Default.Conn.Close()
+
+	err = gosnmp.Default.BulkWalk(query.Oid, printValue)
+	if err != nil {
+		fmt.Printf("Walk Error: %v\n", err)
+		return
+	}
+
 	query.Response = "whatever " + strconv.Itoa(rand.Intn(1e3))
 }
 
