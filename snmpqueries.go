@@ -9,13 +9,17 @@ import (
 	"github.com/eferro/go-snmpqueries/pkg/snmpquery"
 )
 
+const (
+	CONTENTION = 4
+)
+
 func generateRandomQueries(input chan snmpquery.Query) {
 	queryId := 0
 	for {
 		query := snmpquery.Query{
 			Id:          queryId,
 			Query:       "Fake query " + strconv.Itoa(queryId),
-			Destination: "Destination " + strconv.Itoa(rand.Intn(10)),
+			Destination: "Destination " + strconv.Itoa(rand.Intn(3)),
 		}
 		input <- query
 		queryId += 1
@@ -34,7 +38,7 @@ func main() {
 	processed := make(chan snmpquery.Query, 10)
 
 	go generateRandomQueries(input)
-	go snmpquery.Process(input, processed)
+	go snmpquery.Process(input, processed, CONTENTION)
 
 	printResults(processed)
 }
