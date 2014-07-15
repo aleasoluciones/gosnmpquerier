@@ -50,15 +50,13 @@ func Process(input chan Query, processed chan Query, conntention int) {
 	}
 }
 
-func handleQuery(query *Query) {
-
-	gosnmp.Default.Community = query.Community
-	gosnmp.Default.Target = query.Destination
-	gosnmp.Default.Timeout = time.Duration(10 * time.Second)
+func walk(destination, community, oid string, timeout time.Duration) ([]gosnmp.SnmpPDU, error) {
+	gosnmp.Default.Community = community
+	gosnmp.Default.Target = destination
+	gosnmp.Default.Timeout = timeout
 	err := gosnmp.Default.Connect()
 	if err != nil {
-		fmt.Printf("Connect err: %v\n", err)
-		return
+		return nil, err
 	}
 	defer gosnmp.Default.Conn.Close()
 
@@ -69,17 +67,32 @@ func handleQuery(query *Query) {
 		return nil
 	}
 
-	err = gosnmp.Default.BulkWalk(query.Oid, fn)
+	err = gosnmp.Default.BulkWalk(oid, fn)
 	if err != nil {
-		fmt.Printf("Walk Error: %v\n", err)
-		return
+		return nil, err
 	}
-
 	close(output)
 
-	for result := range output {
-		query.Response = append(query.Response, result)
+	result := []gosnmp.SnmpPDU{}
+	for pdu := range output {
+		result = append(result, pdu)
 	}
+	return result, nil
+
+}
+
+func handleQuery(query *Query) {
+
+	switch query.Cmd {
+	case WALK:
+		result, err := walk(query.Destination, query.Community, query.Oid, time.Duration(10*time.Second))
+		if err == nil { // error nil means no error
+			query.Response = result
+		}
+	case GET:
+		// TBD
+	}
+
 }
 
 func processQueriesFromChannel(input chan Query, processed chan Query) {
