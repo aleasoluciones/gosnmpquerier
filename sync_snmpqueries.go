@@ -22,7 +22,7 @@ type QueryMessage struct {
 	AdditionalInfo interface{}
 }
 
-func queryFromLine(line string, queryId int) *snmpquery.Query {
+func queryFromJson(line string, queryId int) *snmpquery.Query {
 	var m QueryMessage
 	m.Timeout = 2
 	m.Retries = 1
@@ -93,8 +93,8 @@ func main() {
 	var input = make(chan QueryWithOutputChannel)
 	go ProcessSynchronous(input)
 
-	q1 := queryFromLine(`{"Command":"get", "Destination":"localhost", "Community":"public", "Oid":"1.3.6.1.2.1.31.1.1.1.6.1"}`, 0)
-	q2 := queryFromLine(`{"Command":"walk", "Destination":"localhost", "Community":"public", "Oid":"1.3.6.1.2.1.31.1.1.1.6"}`, 1)
+	q1 := queryFromJson(`{"Command":"get", "Destination":"localhost", "Community":"public", "Oid":"1.3.6.1.2.1.31.1.1.1.6.1"}`, 0)
+	q2 := queryFromJson(`{"Command":"walk", "Destination":"localhost", "Community":"public", "Oid":"1.3.6.1.2.1.31.1.1.1.6"}`, 1)
 
 	fmt.Println("Result q1...	", executeQuery(input, *q1))
 	fmt.Println("Result q2...	", executeQuery(input, *q2))
