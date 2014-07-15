@@ -82,7 +82,7 @@ func ProcessSynchronous(input chan QueryWithOutputChannel) {
 	}
 }
 
-func foo(queryChannel chan QueryWithOutputChannel, query snmpquery.Query) snmpquery.Query {
+func executeQuery(queryChannel chan QueryWithOutputChannel, query snmpquery.Query) snmpquery.Query {
 	output := make(chan snmpquery.Query)
 	queryChannel <- QueryWithOutputChannel{query, output}
 	processedQuery := <-output
@@ -96,7 +96,7 @@ func main() {
 	q1 := queryFromLine(`{"Command":"get", "Destination":"localhost", "Community":"public", "Oid":"1.3.6.1.2.1.31.1.1.1.6.1"}`, 0)
 	q2 := queryFromLine(`{"Command":"walk", "Destination":"localhost", "Community":"public", "Oid":"1.3.6.1.2.1.31.1.1.1.6"}`, 1)
 
-	fmt.Println("Result q1...	", foo(input, *q1))
-	fmt.Println("Result q2...	", foo(input, *q2))
+	fmt.Println("Result q1...	", executeQuery(input, *q1))
+	fmt.Println("Result q2...	", executeQuery(input, *q2))
 
 }
