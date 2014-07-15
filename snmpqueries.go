@@ -2,10 +2,9 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
-	"log"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/eferro/go-snmpqueries/pkg/snmpquery"
@@ -15,45 +14,70 @@ const (
 	CONTENTION = 4
 )
 
-func readQueriesFromStdin(input chan snmpquery.Query) {
+type QueryMessage struct {
+	Command        string
+	Destination    string
+	Community      string
+	Oid            string
+	Timeout        int
+	Retries        int
+	AdditionalInfo interface{}
+}
+
+func readLinesFromStdin(inputLines chan string) {
 	reader := bufio.NewReader(os.Stdin)
-	queryId := 0
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {
-			break
+			close(inputLines)
+			return
+		}
+		inputLines <- line
+	}
+}
+
+func readQueriesFromStdin(input chan snmpquery.Query) {
+
+	inputLines := make(chan string, 10)
+	go readLinesFromStdin(inputLines)
+
+	queryId := 0
+	for line := range inputLines {
+
+		var m QueryMessage
+		m.Timeout = 2
+		m.Retries = 1
+
+		b := []byte(line)
+		err := json.Unmarshal(b, &m)
+		if err != nil {
+			fmt.Println("Invalid line format", err, line)
 		}
 
-		fields := strings.Fields(line)
-		if len(fields) != 4 {
-			log.Println("InvalidLine", line)
-		} else {
-			var cmd snmpquery.OpSnmp
-			switch fields[0] {
-			case "walk":
-				cmd = snmpquery.WALK
-			case "get":
-				cmd = snmpquery.GET
-			default:
-				log.Println("InvalidLine", line)
-				continue
-			}
-
-			timeout := time.Duration(2 * time.Second)
-			retries := 2
-
-			query := snmpquery.Query{
-				Id:          queryId,
-				Cmd:         cmd,
-				Community:   fields[2],
-				Oid:         fields[3],
-				Destination: fields[1],
-				Timeout:     timeout,
-				Retries:     retries,
-			}
-			input <- query
-			queryId += 1
+		cmd, err := convertCommand(m.Command)
+		query := snmpquery.Query{
+			Id:          queryId,
+			Cmd:         cmd,
+			Community:   m.Community,
+			Oid:         m.Oid,
+			Destination: m.Destination,
+			Timeout:     time.Duration(m.Timeout) * time.Second,
+			Retries:     m.Retries,
 		}
+		fmt.Println("AÑADIMOS QUERY", query.Id)
+		input <- query
+		queryId += 1
+	}
+}
+
+func convertCommand(command string) (snmpquery.OpSnmp, error) {
+	switch command {
+	case "walk":
+		return snmpquery.WALK, nil
+	case "get":
+		return snmpquery.GET, nil
+	default:
+		return 0, fmt.Errorf("Unsupported command %s ", command)
 	}
 }
 
