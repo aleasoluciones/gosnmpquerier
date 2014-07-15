@@ -93,10 +93,8 @@ func main() {
 	var input = make(chan QueryWithOutputChannel)
 	go ProcessSynchronous(input)
 
-	q1 := queryFromJson(`{"Command":"get", "Destination":"localhost", "Community":"public", "Oid":"1.3.6.1.2.1.31.1.1.1.6.1"}`, 0)
-	q2 := queryFromJson(`{"Command":"walk", "Destination":"localhost", "Community":"public", "Oid":"1.3.6.1.2.1.31.1.1.1.6"}`, 1)
-
-	fmt.Println("Result q1...	", executeQuery(input, *q1))
-	fmt.Println("Result q2...	", executeQuery(input, *q2))
-
+	for id := 0; id < 10; id++ {
+		q := queryFromJson(`{"Command":"get", "Destination":"localhost", "Community":"public", "Oid":"1.3.6.1.2.1.31.1.1.1.6.1"}`, id)
+		fmt.Println("Result:", executeQuery(input, *q))
+	}
 }
