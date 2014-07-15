@@ -21,7 +21,7 @@ type Query struct {
 	Oid         string
 	Destination string
 	Response    []gosnmp.SnmpPDU
-	Error       int
+	Error       error
 }
 
 func NewQuery(id int, cmd OpSnmp, destination, community, oid string) *Query {
@@ -56,17 +56,10 @@ func handleQuery(query *Query) {
 
 	switch query.Cmd {
 	case WALK:
-		result, err := walk(query.Destination, query.Community, query.Oid, time.Duration(10*time.Second))
-		if err == nil { // error nil means no error
-			query.Response = result
-		}
+		query.Response, query.Error = walk(query.Destination, query.Community, query.Oid, time.Duration(10*time.Second))
 	case GET:
-		result, err := get(query.Destination, query.Community, query.Oid, time.Duration(10*time.Second))
-		if err == nil { // error nil means no error
-			query.Response = result
-		}
+		query.Response, query.Error = get(query.Destination, query.Community, query.Oid, time.Duration(10*time.Second))
 	}
-
 }
 
 func walk(destination, community, oid string, timeout time.Duration) ([]gosnmp.SnmpPDU, error) {
