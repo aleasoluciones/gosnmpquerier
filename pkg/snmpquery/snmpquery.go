@@ -67,6 +67,8 @@ func handleQuery(query *Query) {
 }
 
 func walk(destination, community, oid string, timeout time.Duration) ([]gosnmp.SnmpPDU, error) {
+	conn := snmpConnection(destination, community, timeout)
+
 	gosnmp.Default.Community = community
 	gosnmp.Default.Target = destination
 	gosnmp.Default.Timeout = timeout
