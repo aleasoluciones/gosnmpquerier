@@ -96,18 +96,27 @@ func walk(destination, community, oid string, timeout time.Duration) ([]gosnmp.S
 	return result, nil
 }
 
-func get(destination, community, oid string, timeout time.Duration) ([]gosnmp.SnmpPDU, error) {
-	gosnmp.Default.Community = community
-	gosnmp.Default.Target = destination
-	gosnmp.Default.Timeout = timeout
+func snmpConnection(destination, community string, timeout time.Duration) *gosnmp.GoSNMP {
+	return &gosnmp.GoSNMP{
+		Target:    destination,
+		Port:      161,
+		Community: community,
+		Version:   gosnmp.Version2c,
+		Timeout:   timeout,
+		Retries:   1,
+	}
+}
 
-	err := gosnmp.Default.Connect()
+func get(destination, community, oid string, timeout time.Duration) ([]gosnmp.SnmpPDU, error) {
+	conn := snmpConnection(destination, community, timeout)
+
+	err := conn.Connect()
 	if err != nil {
 		return nil, err
 	}
-	defer gosnmp.Default.Conn.Close()
+	defer conn.Conn.Close()
 
-	result, err := gosnmp.Default.Get([]string{oid})
+	result, err := conn.Get([]string{oid})
 	if err != nil {
 		return nil, err
 	}
