@@ -1,7 +1,6 @@
 package snmpquery
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/soniah/gosnmp"
@@ -50,6 +49,23 @@ func Process(input chan Query, processed chan Query, conntention int) {
 	}
 }
 
+func handleQuery(query *Query) {
+
+	switch query.Cmd {
+	case WALK:
+		result, err := walk(query.Destination, query.Community, query.Oid, time.Duration(10*time.Second))
+		if err == nil { // error nil means no error
+			query.Response = result
+		}
+	case GET:
+		result, err := get(query.Destination, query.Community, query.Oid, time.Duration(10*time.Second))
+		if err == nil { // error nil means no error
+			query.Response = result
+		}
+	}
+
+}
+
 func walk(destination, community, oid string, timeout time.Duration) ([]gosnmp.SnmpPDU, error) {
 	gosnmp.Default.Community = community
 	gosnmp.Default.Target = destination
@@ -78,21 +94,29 @@ func walk(destination, community, oid string, timeout time.Duration) ([]gosnmp.S
 		result = append(result, pdu)
 	}
 	return result, nil
-
 }
 
-func handleQuery(query *Query) {
+func get(destination, community, oid string, timeout time.Duration) ([]gosnmp.SnmpPDU, error) {
+	gosnmp.Default.Community = community
+	gosnmp.Default.Target = destination
+	gosnmp.Default.Timeout = timeout
 
-	switch query.Cmd {
-	case WALK:
-		result, err := walk(query.Destination, query.Community, query.Oid, time.Duration(10*time.Second))
-		if err == nil { // error nil means no error
-			query.Response = result
-		}
-	case GET:
-		// TBD
+	err := gosnmp.Default.Connect()
+	if err != nil {
+		return nil, err
+	}
+	defer gosnmp.Default.Conn.Close()
+
+	result, err := gosnmp.Default.Get([]string{oid})
+	if err != nil {
+		return nil, err
 	}
 
+	pdus := []gosnmp.SnmpPDU{}
+	for _, pdu := range result.Variables {
+		pdus = append(pdus, pdu)
+	}
+	return pdus, nil
 }
 
 func processQueriesFromChannel(input chan Query, processed chan Query) {
