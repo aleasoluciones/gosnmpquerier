@@ -47,7 +47,7 @@ func readQueriesFromStdin(input chan snmpquery.Query) {
 
 func printResults(processed chan snmpquery.Query) {
 	for query := range processed {
-		fmt.Println(query)
+		fmt.Println("Result", query)
 	}
 }
 

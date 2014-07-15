@@ -2,8 +2,6 @@ package snmpquery
 
 import (
 	"fmt"
-	"math/rand"
-	"strconv"
 	"time"
 
 	"github.com/soniah/gosnmp"
@@ -22,7 +20,7 @@ type Query struct {
 	Community   string
 	Oid         string
 	Destination string
-	Response    string
+	Response    []gosnmp.SnmpPDU
 	Error       int
 }
 
@@ -64,18 +62,10 @@ func handleQuery(query *Query) {
 	}
 	defer gosnmp.Default.Conn.Close()
 
-	output := make(chan string, 10)
+	output := make(chan gosnmp.SnmpPDU, 10)
 
 	fn := func(pdu gosnmp.SnmpPDU) error {
-		out := pdu.Name
-
-		switch pdu.Type {
-		case gosnmp.OctetString:
-			out += "STRING "
-		case gosnmp.Counter64:
-			out += "COUNTER64 "
-		}
-		output <- out
+		output <- pdu
 		return nil
 	}
 
@@ -85,11 +75,11 @@ func handleQuery(query *Query) {
 		return
 	}
 
-	for result := range output {
-		fmt.Println("EFA", result)
-	}
+	close(output)
 
-	query.Response = "whatever " + strconv.Itoa(rand.Intn(1e3))
+	for result := range output {
+		query.Response = append(query.Response, result)
+	}
 }
 
 func processQueriesFromChannel(input chan Query, processed chan Query) {
