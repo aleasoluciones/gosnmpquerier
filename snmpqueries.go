@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/eferro/go-snmpqueries/pkg/snmpquery"
 )
@@ -38,8 +39,19 @@ func readQueriesFromStdin(input chan snmpquery.Query) {
 				continue
 			}
 
-			query := snmpquery.NewQuery(queryId, cmd, fields[1], fields[2], fields[3])
-			input <- *query
+			timeout := time.Duration(2 * time.Second)
+			retries := 2
+
+			query := snmpquery.Query{
+				Id:          queryId,
+				Cmd:         cmd,
+				Community:   fields[2],
+				Oid:         fields[3],
+				Destination: fields[1],
+				Timeout:     timeout,
+				Retries:     retries,
+			}
+			input <- query
 			queryId += 1
 		}
 	}

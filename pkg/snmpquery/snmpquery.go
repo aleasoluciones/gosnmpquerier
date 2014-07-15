@@ -19,19 +19,11 @@ type Query struct {
 	Cmd         OpSnmp
 	Community   string
 	Oid         string
+	Timeout     time.Duration
+	Retries     int
 	Destination string
 	Response    []gosnmp.SnmpPDU
 	Error       error
-}
-
-func NewQuery(id int, cmd OpSnmp, destination, community, oid string) *Query {
-	return &Query{
-		Id:          id,
-		Cmd:         cmd,
-		Community:   community,
-		Oid:         oid,
-		Destination: destination,
-	}
 }
 
 func Process(input chan Query, processed chan Query, conntention int) {
@@ -56,14 +48,14 @@ func handleQuery(query *Query) {
 
 	switch query.Cmd {
 	case WALK:
-		query.Response, query.Error = walk(query.Destination, query.Community, query.Oid, time.Duration(10*time.Second))
+		query.Response, query.Error = walk(query.Destination, query.Community, query.Oid, query.Timeout, query.Retries)
 	case GET:
-		query.Response, query.Error = get(query.Destination, query.Community, query.Oid, time.Duration(10*time.Second))
+		query.Response, query.Error = get(query.Destination, query.Community, query.Oid, query.Timeout, query.Retries)
 	}
 }
 
-func walk(destination, community, oid string, timeout time.Duration) ([]gosnmp.SnmpPDU, error) {
-	conn := snmpConnection(destination, community, timeout)
+func walk(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+	conn := snmpConnection(destination, community, timeout, retries)
 	err := conn.Connect()
 	if err != nil {
 		return nil, err
@@ -96,19 +88,19 @@ func doWalk(conn gosnmp.GoSNMP, oid string, output chan gosnmp.SnmpPDU, errChann
 	close(output)
 }
 
-func snmpConnection(destination, community string, timeout time.Duration) gosnmp.GoSNMP {
+func snmpConnection(destination, community string, timeout time.Duration, retries int) gosnmp.GoSNMP {
 	return gosnmp.GoSNMP{
 		Target:    destination,
 		Port:      161,
 		Community: community,
 		Version:   gosnmp.Version2c,
 		Timeout:   timeout,
-		Retries:   1,
+		Retries:   retries,
 	}
 }
 
-func get(destination, community, oid string, timeout time.Duration) ([]gosnmp.SnmpPDU, error) {
-	conn := snmpConnection(destination, community, timeout)
+func get(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+	conn := snmpConnection(destination, community, timeout, retries)
 	err := conn.Connect()
 	if err != nil {
 		return nil, err
