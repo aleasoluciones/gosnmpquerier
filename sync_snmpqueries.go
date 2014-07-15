@@ -22,15 +22,15 @@ type QueryMessage struct {
 	AdditionalInfo interface{}
 }
 
-func queryFromJson(line string, queryId int) *snmpquery.Query {
+func queryFromJson(jsonText string, queryId int) *snmpquery.Query {
 	var m QueryMessage
 	m.Timeout = 2
 	m.Retries = 1
 
-	b := []byte(line)
+	b := []byte(jsonText)
 	err := json.Unmarshal(b, &m)
 	if err != nil {
-		fmt.Println("Invalid line format", err, line)
+		fmt.Println("Invalid jsonText format", err, jsonText)
 		return nil
 	}
 
