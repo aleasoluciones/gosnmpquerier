@@ -62,7 +62,7 @@ type QueryWithOutputChannel struct {
 	responseChannel chan snmpquery.Query
 }
 
-func ProcessSynchronous(input chan QueryWithOutputChannel) {
+func ProcessAndDispatchQueries(input chan QueryWithOutputChannel) {
 
 	inputQueries := make(chan snmpquery.Query, 10)
 	processed := make(chan snmpquery.Query, 10)
@@ -77,7 +77,7 @@ func ProcessSynchronous(input chan QueryWithOutputChannel) {
 			inputQueries <- queryWithOutputChannel.query
 		case processedQuery := <-processed:
 			m[processedQuery.Id] <- processedQuery
-			// borrar la entrada del mapa....
+			delete(m, processedQuery.Id)
 		}
 	}
 }
@@ -91,10 +91,10 @@ func executeQuery(queryChannel chan QueryWithOutputChannel, query snmpquery.Quer
 
 func main() {
 	var input = make(chan QueryWithOutputChannel)
-	go ProcessSynchronous(input)
+	go ProcessAndDispatchQueries(input)
 
 	for id := 0; id < 10; id++ {
-		q := queryFromJson(`{"Command":"get", "Destination":"localhost", "Community":"public", "Oid":"1.3.6.1.2.1.31.1.1.1.6.1"}`, id)
+		q := queryFromJson(`{"Command":"walk", "Destination":"localhost", "Community":"public", "Oid":"1.3.6.1.2.1.25.1"}`, id)
 		fmt.Println("Result:", executeQuery(input, *q))
 	}
 }
