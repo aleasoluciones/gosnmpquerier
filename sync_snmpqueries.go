@@ -47,7 +47,7 @@ func main() {
 	go ProcessAndDispatchQueries(input)
 
 	for id := 0; id < 10; id++ {
-		q := snmpquery.FromJson(`{"command":"walk", "destination":"localhost", "community":"public", "oid":"1.3.6.1.2.1.25.1"}`)
+		q, _ := snmpquery.FromJson(`{"command":"walk", "destination":"localhost", "community":"public", "oid":"1.3.6.1.2.1.25.1"}`)
 		q.Id = id
 		fmt.Println("Result:", executeQuery(input, *q))
 	}
