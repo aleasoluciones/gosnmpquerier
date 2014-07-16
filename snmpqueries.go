@@ -31,10 +31,14 @@ func readQueriesFromStdin(input chan snmpquery.Query) {
 
 	queryId := 0
 	for line := range inputLines {
-		query := snmpquery.FromJson(line)
-		query.Id = queryId
-		input <- *query
-		queryId += 1
+		query, err := snmpquery.FromJson(line)
+		if err != nil {
+			fmt.Println("Invalid line:", line, err)
+		} else {
+			query.Id = queryId
+			input <- *query
+			queryId += 1
+		}
 	}
 }
 
