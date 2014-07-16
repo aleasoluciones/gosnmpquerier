@@ -16,11 +16,16 @@ type queryMessage struct {
 	AdditionalInfo interface{}
 }
 
-func ToJson() string {
-	return `{ "body":"test" }`
+func ToJson(query *Query) (string, error) {
+
+	b, err := json.Marshal(query)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
 }
 
-func FromJson(jsonText string) *Query {
+func FromJson(jsonText string) (*Query, error) {
 	var m queryMessage
 	m.Timeout = 2
 	m.Retries = 1
@@ -28,16 +33,15 @@ func FromJson(jsonText string) *Query {
 	b := []byte(jsonText)
 	err := json.Unmarshal(b, &m)
 	if err != nil {
-		fmt.Println("Invalid jsonText format", err, jsonText)
-		return nil
+		return nil, err
 	}
 
 	cmd, err := convertCommand(m.Command)
 	if err != nil {
-		fmt.Println("ERROR", err)
+		return nil, err
 	}
-	// TODO process err
-	return &Query{
+
+	q := Query{
 		Cmd:         cmd,
 		Community:   m.Community,
 		Oid:         m.Oid,
@@ -45,6 +49,7 @@ func FromJson(jsonText string) *Query {
 		Timeout:     time.Duration(m.Timeout) * time.Second,
 		Retries:     m.Retries,
 	}
+	return &q, nil
 }
 
 func convertCommand(command string) (OpSnmp, error) {
