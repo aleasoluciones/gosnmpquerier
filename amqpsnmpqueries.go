@@ -89,7 +89,7 @@ func publishResults(processed chan snmpquery.Query, amqpUri, exchangeName, routi
 			fmt.Println("Error converting to json:", err, query)
 			continue
 		}
-		amqp.Publish(amqpUri, exchangeName, "direct", routingKey, jsonText, false)
+		amqp.Publish(amqpUri, exchangeName, routingKey, jsonText, false)
 	}
 }
 
