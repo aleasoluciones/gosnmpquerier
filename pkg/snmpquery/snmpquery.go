@@ -125,3 +125,36 @@ func processQueriesFromChannel(input chan Query, processed chan Query) {
 		processed <- query
 	}
 }
+
+type QueryWithOutputChannel struct {
+	query           Query
+	responseChannel chan Query
+}
+
+func ProcessAndDispatchQueries(input chan QueryWithOutputChannel, contention int) {
+
+	inputQueries := make(chan Query, 10)
+	processed := make(chan Query, 10)
+
+	go Process(inputQueries, processed, contention)
+
+	m := make(map[int]chan Query)
+	for {
+		select {
+		case queryWithOutputChannel := <-input:
+			m[queryWithOutputChannel.query.Id] = queryWithOutputChannel.responseChannel
+			inputQueries <- queryWithOutputChannel.query
+		case processedQuery := <-processed:
+			m[processedQuery.Id] <- processedQuery
+			delete(m, processedQuery.Id)
+		}
+	}
+}
+
+func ExecuteQuery(queryChannel chan QueryWithOutputChannel, query Query) Query {
+	output := make(chan Query)
+	queryChannel <- QueryWithOutputChannel{query, output}
+	processedQuery := <-output
+	return processedQuery
+}
+
