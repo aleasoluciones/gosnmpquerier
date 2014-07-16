@@ -67,3 +67,47 @@ func confirmOne(ack, nack chan uint64) {
 		log.Printf("failed delivery of delivery tag: %d", tag)
 	}
 }
+
+func ReadJsonQueriesFromAmqp(amqpUri, exchangeName, queueName, bindingKey string) chan string {
+	jsonQueries := make(chan string)
+
+	go func() {
+		conn, err := amqp.Dial(amqpUri)
+		if err != nil {
+			fmt.Println("Error dialing", err, amqpUri)
+		}
+		channel, err := conn.Channel()
+		if err != nil {
+			fmt.Println("Error geting channel", err)
+		}
+		err = channel.QueueBind(
+			queueName,    // name of the queue
+			bindingKey,   // bindingKey
+			exchangeName, // sourceExchange
+			false,        // noWait
+			nil,          // arg
+		)
+		if err != nil {
+			fmt.Println("Error queue binding", err, "queue", queueName, "bindingKey", bindingKey)
+		}
+
+		deliveries, err := channel.Consume(
+			queueName, // name
+			"tag-efa", // consumerTag,
+			false,     // noAck
+			false,     // exclusive
+			false,     // noLocal
+			false,     // noWait
+			nil,       // arguments
+		)
+		if err != nil {
+			fmt.Println("Error consuming", err, "queue", queueName)
+		}
+		for delivery := range deliveries {
+			jsonQueries <- string(delivery.Body)
+			delivery.Ack(false)
+
+		}
+	}()
+	return jsonQueries
+}

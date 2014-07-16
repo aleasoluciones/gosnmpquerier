@@ -157,4 +157,3 @@ func ExecuteQuery(queryChannel chan QueryWithOutputChannel, query Query) Query {
 	processedQuery := <-output
 	return processedQuery
 }
-
