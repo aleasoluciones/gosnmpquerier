@@ -64,7 +64,6 @@ func readQueriesFromStdin(input chan snmpquery.Query) {
 			Timeout:     time.Duration(m.Timeout) * time.Second,
 			Retries:     m.Retries,
 		}
-		fmt.Println("AÑADIMOS QUERY", query.Id)
 		input <- query
 		queryId += 1
 	}
