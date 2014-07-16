@@ -36,7 +36,7 @@ func FromJson(jsonText string) (*Query, error) {
 		return nil, err
 	}
 
-	cmd, err := convertCommand(m.Command)
+	cmd, err := ConvertCommand(m.Command)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func FromJson(jsonText string) (*Query, error) {
 	return &q, nil
 }
 
-func convertCommand(command string) (OpSnmp, error) {
+func ConvertCommand(command string) (OpSnmp, error) {
 	switch command {
 	case "walk":
 		return WALK, nil
