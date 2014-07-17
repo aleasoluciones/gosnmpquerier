@@ -1,14 +1,29 @@
 # -*- coding: utf-8 -*-
 
 import requests
+import data
+import argparse
+import random
 
-data = {
-    'cmd': 'get',
-    'destination': 'localhost',
-    'community': 'kaleidos',
-    'oid': '1.3.6.1.2.1.2.2.1.10.1'
-}
+def main():
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--community', required=True, action="store", dest="community")
+	args = parser.parse_args()
 
-r = requests.get('http://localhost:8080/', params=data)
+	for num in xrange(0,20):
+		cmd, oid = random.choice(data.commands)
+		destination = random.choice(data.destinations)
+		query = {
+			'cmd': cmd,
+			'destination': destination,
+			'community': args.community,
+			'oid': oid
+		}
 
-print('RESULTADO: ', r.text)
+		r = requests.get('http://localhost:8080/', params=query)
+		print('RESULTADO: ', r.text)
+
+
+
+if __name__ == '__main__':
+	main()
