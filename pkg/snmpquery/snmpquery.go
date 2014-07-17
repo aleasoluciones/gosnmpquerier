@@ -139,9 +139,12 @@ func ProcessAndDispatchQueries(input chan QueryWithOutputChannel, contention int
 	go Process(inputQueries, processed, contention)
 
 	m := make(map[int]chan Query)
+    i := 0
 	for {
 		select {
 		case queryWithOutputChannel := <-input:
+            queryWithOutputChannel.query.Id = i
+            i += 1
 			m[queryWithOutputChannel.query.Id] = queryWithOutputChannel.responseChannel
 			inputQueries <- queryWithOutputChannel.query
 		case processedQuery := <-processed:
