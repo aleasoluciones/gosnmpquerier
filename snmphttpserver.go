@@ -9,27 +9,36 @@ import (
 	"github.com/eferro/go-snmpqueries/pkg/snmpquery"
 )
 
-func rootHandler(w http.ResponseWriter, r *http.Request) {
+const (
+    CONTENTION = 4
+)
 
-    fmt.Println(r.FormValue("query"))
+func rootHandler(input chan snmpquery.QueryWithOutputChannel, w http.ResponseWriter, r *http.Request) {
 
+    cmd, _ := snmpquery.ConvertCommand(r.FormValue("cmd"))
     query := snmpquery.Query{
-        Cmd:         snmpquery.ConvertCommand(r.FormValue("cmd")),
+        Cmd:         cmd,
         Community:   r.FormValue("community"),
         Oid:         r.FormValue("oid"),
-        Timeout:     time.Duration(m.Timeout) * time.Second,
+        Timeout:     time.Duration(10) * time.Second,
         Retries:     1,
         Destination: r.FormValue("destination"),
     }
-
-    processed := snmpquery.ExecuteQuery(query)
-
-    if err := encoder.Encode(&query); err != nil {
-            http.Error(w, fmt.Sprintf("Cannot encode response data: %v", err), 500)
-        }
+    processed := snmpquery.ExecuteQuery(input, query)
+    jsonProcessed, err := snmpquery.ToJson(&processed)
+    if err != nil {
+        fmt.Fprint(w, err)
     }
+    fmt.Fprint(w, jsonProcessed)
+
+}
 
 func main() {
-    http.HandleFunc("/", rootHandler)
+    var input = make(chan snmpquery.QueryWithOutputChannel)
+    go snmpquery.ProcessAndDispatchQueries(input, CONTENTION)
+
+    http.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
+        rootHandler(input, w, r)
+    })
     log.Fatal(http.ListenAndServe(":8080", nil))
 }
