@@ -37,7 +37,7 @@ def main():
 	client = puka.Client(args.amqp_uri)
 	promise = client.connect()
 	client.wait(promise)
-	for num in xrange(0,1000):
+	for num in xrange(0,100):
 		promise = client.basic_publish(
 			exchange='EFA_SRC', 
 			routing_key='', 
