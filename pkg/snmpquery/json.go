@@ -31,11 +31,10 @@ type outputMessage struct {
 }
 
 func ToJson(query *Query) (string, error) {
-   var errString string = ""
-   if query.Error !=  nil {
-       errString = query.Error.Error()
-   }
-
+    var errString string = ""
+    if query.Error !=  nil {
+        errString = query.Error.Error()
+    }
     d := outputMessage{
         Id: query.Id,
         Command: convertCommandToCommandString(query.Cmd),
