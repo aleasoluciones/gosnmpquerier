@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+
+	"github.com/soniah/gosnmp"
 )
 
 type queryMessage struct {
@@ -16,12 +18,38 @@ type queryMessage struct {
 	AdditionalInfo interface{}
 }
 
+type outputMessage struct {
+	Id          int
+	Command     OpSnmp
+	Community   string
+	Oid         string
+	Timeout     time.Duration
+	Retries     int
+	Destination string
+	Response    []gosnmp.SnmpPDU
+	Error       string
+}
+
 func ToJson(query *Query) (string, error) {
 
-	b, err := json.Marshal(query)
+    d := outputMessage{
+        Id: query.Id,
+        Command: query.Cmd,
+        Community: query.Community,
+        Oid: query.Oid,
+        Timeout: query.Timeout,
+        Retries: query.Retries,
+        Destination: query.Destination,
+        Response: query.Response,
+        Error: query.Error.Error(),
+    }
+    fmt.Println(d)
+	b, err := json.Marshal(d)
+
 	if err != nil {
 		return "", err
 	}
+
 	return string(b), nil
 }
 
