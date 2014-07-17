@@ -20,7 +20,7 @@ type queryMessage struct {
 
 type outputMessage struct {
 	Id          int
-	Command     OpSnmp
+	Command     string
 	Community   string
 	Oid         string
 	Timeout     time.Duration
@@ -31,17 +31,21 @@ type outputMessage struct {
 }
 
 func ToJson(query *Query) (string, error) {
+   var errString string = ""
+   if query.Error !=  nil {
+       errString = query.Error.Error()
+   }
 
     d := outputMessage{
         Id: query.Id,
-        Command: query.Cmd,
+        Command: convertCommandToCommandString(query.Cmd),
         Community: query.Community,
         Oid: query.Oid,
         Timeout: query.Timeout,
         Retries: query.Retries,
         Destination: query.Destination,
         Response: query.Response,
-        Error: query.Error.Error(),
+        Error: errString,
     }
     fmt.Println(d)
 	b, err := json.Marshal(d)
@@ -78,6 +82,16 @@ func FromJson(jsonText string) (*Query, error) {
 		Retries:     m.Retries,
 	}
 	return &q, nil
+}
+
+func convertCommandToCommandString(command OpSnmp) string {
+    switch command{
+        case WALK:
+            return "walk"
+        case  GET:
+            return "get"
+    }
+    return ""
 }
 
 func ConvertCommand(command string) (OpSnmp, error) {
