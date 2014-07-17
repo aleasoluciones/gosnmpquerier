@@ -1,0 +1,9 @@
+
+
+https://github.com/eferro/rabbitmqmgmt
+
+rabbitmqmgmt --amqp_uri <amqp_uri> exchange_add SRC_EXCHANGE
+rabbitmqmgmt --amqp_uri <amqp_uri> queue_add SRC_QUEUE
+rabbitmqmgmt --amqp_uri <amqp_uri> exchange_add DST_EXCHANGE
+
+go run amqpsnmpqueries.go -amqp_uri <amqp_uri> -queue EFA_SRC -src_exchange EFA_SRC -dst_exchange EFA_DST
