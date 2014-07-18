@@ -1,7 +1,6 @@
 package snmpquery
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/soniah/gosnmp"
@@ -27,8 +26,6 @@ type Query struct {
 }
 
 func Process(input chan Query, processed chan Query, conntention int) {
-	fmt.Println("EFA DELETE")
-
 	m := make(map[string]chan Query)
 
 	for query := range input {
@@ -45,7 +42,6 @@ func Process(input chan Query, processed chan Query, conntention int) {
 }
 
 func handleQuery(query *Query) {
-
 	switch query.Cmd {
 	case WALK:
 		query.Response, query.Error = walk(query.Destination, query.Community, query.Oid, query.Timeout, query.Retries)
@@ -132,19 +128,18 @@ type QueryWithOutputChannel struct {
 }
 
 func ProcessAndDispatchQueries(input chan QueryWithOutputChannel, contention int) {
-
 	inputQueries := make(chan Query, 10)
 	processed := make(chan Query, 10)
 
 	go Process(inputQueries, processed, contention)
 
 	m := make(map[int]chan Query)
-    i := 0
+	i := 0
 	for {
 		select {
 		case queryWithOutputChannel := <-input:
-            queryWithOutputChannel.query.Id = i
-            i += 1
+			queryWithOutputChannel.query.Id = i
+			i += 1
 			m[queryWithOutputChannel.query.Id] = queryWithOutputChannel.responseChannel
 			inputQueries <- queryWithOutputChannel.query
 		case processedQuery := <-processed:
