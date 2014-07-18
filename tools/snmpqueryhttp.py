@@ -10,7 +10,7 @@ def main():
 	parser.add_argument('--community', required=True, action="store", dest="community")
 	args = parser.parse_args()
 
-	for num in xrange(0,20):
+	for num in xrange(0,100):
 		cmd, oid = random.choice(data.commands)
 		destination = random.choice(data.destinations)
 		query = {
