@@ -62,6 +62,26 @@ type QueryWithOutputChannel struct {
 	responseChannel chan Query
 }
 
+type SynchronousQuerier struct {
+	Input chan QueryWithOutputChannel
+}
+
+func NewSynchronousQuerier(contention int) *SynchronousQuerier {
+	querier := SynchronousQuerier{
+		Input: make(chan QueryWithOutputChannel),
+	}
+
+	go ProcessAndDispatchQueries(querier.Input, contention)
+	return &querier
+}
+
+func (querier *SynchronousQuerier) ExecuteQuery(query Query) Query {
+	output := make(chan Query)
+	querier.Input <- QueryWithOutputChannel{query, output}
+	processedQuery := <-output
+	return processedQuery
+}
+
 func ProcessAndDispatchQueries(input chan QueryWithOutputChannel, contention int) {
 	inputQueries := make(chan Query, 10)
 	processed := make(chan Query, 10)
@@ -82,11 +102,4 @@ func ProcessAndDispatchQueries(input chan QueryWithOutputChannel, contention int
 			delete(m, processedQuery.Id)
 		}
 	}
-}
-
-func ExecuteQuery(queryChannel chan QueryWithOutputChannel, query Query) Query {
-	output := make(chan Query)
-	queryChannel <- QueryWithOutputChannel{query, output}
-	processedQuery := <-output
-	return processedQuery
 }
