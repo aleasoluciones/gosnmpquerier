@@ -71,7 +71,7 @@ func NewSynchronousQuerier(contention int) *SynchronousQuerier {
 		Input: make(chan QueryWithOutputChannel),
 	}
 
-	go ProcessAndDispatchQueries(querier.Input, contention)
+	go processAndDispatchQueries(querier.Input, contention)
 	return &querier
 }
 
@@ -82,7 +82,7 @@ func (querier *SynchronousQuerier) ExecuteQuery(query Query) Query {
 	return processedQuery
 }
 
-func ProcessAndDispatchQueries(input chan QueryWithOutputChannel, contention int) {
+func processAndDispatchQueries(input chan QueryWithOutputChannel, contention int) {
 	inputQueries := make(chan Query, 10)
 	processed := make(chan Query, 10)
 
