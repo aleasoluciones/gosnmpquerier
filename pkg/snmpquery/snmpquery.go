@@ -25,7 +25,7 @@ type Query struct {
 	Error       error
 }
 
-func Process(input chan Query, processed chan Query, conntention int) {
+func process(input chan Query, processed chan Query, conntention int) {
 	m := make(map[string]chan Query)
 
 	for query := range input {
@@ -62,6 +62,21 @@ type QueryWithOutputChannel struct {
 	responseChannel chan Query
 }
 
+type Querier struct {
+	Input  chan Query
+	Output chan Query
+}
+
+func New(contention int) *Querier {
+	querier := Querier{
+		Input:  make(chan Query, 10),
+		Output: make(chan Query, 10),
+	}
+
+	go process(querier.Input, querier.Output, contention)
+	return &querier
+}
+
 type SynchronousQuerier struct {
 	Input chan QueryWithOutputChannel
 }
@@ -86,7 +101,7 @@ func processAndDispatchQueries(input chan QueryWithOutputChannel, contention int
 	inputQueries := make(chan Query, 10)
 	processed := make(chan Query, 10)
 
-	go Process(inputQueries, processed, contention)
+	go process(inputQueries, processed, contention)
 
 	m := make(map[int]chan Query)
 	i := 0

@@ -13,7 +13,7 @@ const (
 	CONTENTION = 4
 )
 
-func rootHandler(input chan snmpquery.QueryWithOutputChannel, w http.ResponseWriter, r *http.Request) {
+func rootHandler(querier *snmpquery.SynchronousQuerier, w http.ResponseWriter, r *http.Request) {
 
 	cmd, _ := snmpquery.ConvertCommand(r.FormValue("cmd"))
 	query := snmpquery.Query{
@@ -24,7 +24,7 @@ func rootHandler(input chan snmpquery.QueryWithOutputChannel, w http.ResponseWri
 		Retries:     1,
 		Destination: r.FormValue("destination"),
 	}
-	processed := snmpquery.ExecuteQuery(input, query)
+	processed := querier.ExecuteQuery(query)
 	jsonProcessed, err := snmpquery.ToJson(&processed)
 	if err != nil {
 		fmt.Fprint(w, err)
@@ -34,11 +34,11 @@ func rootHandler(input chan snmpquery.QueryWithOutputChannel, w http.ResponseWri
 }
 
 func main() {
-	var input = make(chan snmpquery.QueryWithOutputChannel)
-	go snmpquery.ProcessAndDispatchQueries(input, CONTENTION)
+
+	querier := snmpquery.NewSynchronousQuerier(CONTENTION)
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		rootHandler(input, w, r)
+		rootHandler(querier, w, r)
 	})
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

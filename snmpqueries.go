@@ -49,11 +49,10 @@ func printResults(processed chan snmpquery.Query) {
 }
 
 func main() {
-	input := make(chan snmpquery.Query, 10)
-	processed := make(chan snmpquery.Query, 10)
 
-	go readQueriesFromStdin(input)
-	go snmpquery.Process(input, processed, CONTENTION)
+	querier := snmpquery.New(CONTENTION)
 
-	printResults(processed)
+	go readQueriesFromStdin(querier.Input)
+
+	printResults(querier.Output)
 }
