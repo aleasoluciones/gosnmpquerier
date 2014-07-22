@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/soniah/gosnmp"
+	"github.com/eferro/gosnmp"
 )
 
 type queryMessage struct {
@@ -31,22 +31,22 @@ type outputMessage struct {
 }
 
 func ToJson(query *Query) (string, error) {
-    var errString string = ""
-    if query.Error !=  nil {
-        errString = query.Error.Error()
-    }
-    d := outputMessage{
-        Id: query.Id,
-        Command: convertCommandToCommandString(query.Cmd),
-        Community: query.Community,
-        Oid: query.Oid,
-        Timeout: query.Timeout,
-        Retries: query.Retries,
-        Destination: query.Destination,
-        Response: query.Response,
-        Error: errString,
-    }
-    fmt.Println(d)
+	var errString string = ""
+	if query.Error != nil {
+		errString = query.Error.Error()
+	}
+	d := outputMessage{
+		Id:          query.Id,
+		Command:     convertCommandToCommandString(query.Cmd),
+		Community:   query.Community,
+		Oid:         query.Oid,
+		Timeout:     query.Timeout,
+		Retries:     query.Retries,
+		Destination: query.Destination,
+		Response:    query.Response,
+		Error:       errString,
+	}
+	fmt.Println(d)
 	b, err := json.Marshal(d)
 
 	if err != nil {
@@ -84,13 +84,13 @@ func FromJson(jsonText string) (*Query, error) {
 }
 
 func convertCommandToCommandString(command OpSnmp) string {
-    switch command{
-        case WALK:
-            return "walk"
-        case  GET:
-            return "get"
-    }
-    return ""
+	switch command {
+	case WALK:
+		return "walk"
+	case GET:
+		return "get"
+	}
+	return ""
 }
 
 func ConvertCommand(command string) (OpSnmp, error) {

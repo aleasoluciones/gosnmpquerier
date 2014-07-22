@@ -3,7 +3,7 @@ package snmpquery
 import (
 	"time"
 
-	"github.com/soniah/gosnmp"
+	"github.com/eferro/gosnmp"
 )
 
 func walk(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {

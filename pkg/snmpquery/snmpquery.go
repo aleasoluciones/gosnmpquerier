@@ -3,7 +3,7 @@ package snmpquery
 import (
 	"time"
 
-	"github.com/soniah/gosnmp"
+	"github.com/eferro/gosnmp"
 )
 
 type OpSnmp int32
