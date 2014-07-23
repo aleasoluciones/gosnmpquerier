@@ -13,7 +13,7 @@ const (
 	CONTENTION = 4
 )
 
-func rootHandler(querier *snmpquery.SynchronousQuerier, w http.ResponseWriter, r *http.Request) {
+func rootHandler(querier *snmpquery.SyncQuerier, w http.ResponseWriter, r *http.Request) {
 
 	cmd, _ := snmpquery.ConvertCommand(r.FormValue("cmd"))
 	query := snmpquery.Query{
@@ -35,7 +35,7 @@ func rootHandler(querier *snmpquery.SynchronousQuerier, w http.ResponseWriter, r
 
 func main() {
 
-	querier := snmpquery.NewSynchronousQuerier(CONTENTION)
+	querier := snmpquery.NewSyncQuerier(CONTENTION)
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		rootHandler(querier, w, r)

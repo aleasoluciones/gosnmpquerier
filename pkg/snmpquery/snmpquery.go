@@ -77,12 +77,12 @@ func New(contention int) *Querier {
 	return &querier
 }
 
-type SynchronousQuerier struct {
+type SyncQuerier struct {
 	Input chan QueryWithOutputChannel
 }
 
-func NewSynchronousQuerier(contention int) *SynchronousQuerier {
-	querier := SynchronousQuerier{
+func NewSyncQuerier(contention int) *SyncQuerier {
+	querier := SyncQuerier{
 		Input: make(chan QueryWithOutputChannel),
 	}
 
@@ -90,7 +90,7 @@ func NewSynchronousQuerier(contention int) *SynchronousQuerier {
 	return &querier
 }
 
-func (querier *SynchronousQuerier) ExecuteQuery(query Query) Query {
+func (querier *SyncQuerier) ExecuteQuery(query Query) Query {
 	output := make(chan Query)
 	querier.Input <- QueryWithOutputChannel{query, output}
 	processedQuery := <-output
