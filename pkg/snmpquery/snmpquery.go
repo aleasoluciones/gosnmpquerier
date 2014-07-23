@@ -25,68 +25,21 @@ type Query struct {
 	Error       error
 }
 
-func process(input chan Query, processed chan Query, conntention int) {
-	m := make(map[string]chan Query)
-
-	for query := range input {
-		_, exists := m[query.Destination]
-		if exists == false {
-			channel_tmp := make(chan Query, 10)
-			m[query.Destination] = channel_tmp
-			for i := 0; i < conntention; i++ {
-				go processQueriesFromChannel(channel_tmp, processed)
-			}
-		}
-		m[query.Destination] <- query
-	}
-}
-
-func handleQuery(query *Query) {
-	switch query.Cmd {
-	case WALK:
-		query.Response, query.Error = walk(query.Destination, query.Community, query.Oid, query.Timeout, query.Retries)
-	case GET:
-		query.Response, query.Error = get(query.Destination, query.Community, query.Oid, query.Timeout, query.Retries)
-	}
-}
-
-func processQueriesFromChannel(input chan Query, processed chan Query) {
-	for query := range input {
-		handleQuery(&query)
-		processed <- query
-	}
-}
-
 type QueryWithOutputChannel struct {
 	query           Query
 	responseChannel chan Query
 }
 
-type AsyncQuerier struct {
-	Input  chan Query
-	Output chan Query
-}
-
-func NewAsyncQuerier(contention int) *AsyncQuerier {
-	querier := AsyncQuerier{
-		Input:  make(chan Query, 10),
-		Output: make(chan Query, 10),
-	}
-
-	go process(querier.Input, querier.Output, contention)
-	return &querier
-}
-
 type SyncQuerier struct {
-	Input chan QueryWithOutputChannel
+	Input        chan QueryWithOutputChannel
+	asyncQuerier *AsyncQuerier
 }
 
 func NewSyncQuerier(contention int) *SyncQuerier {
 	querier := SyncQuerier{
-		Input: make(chan QueryWithOutputChannel),
+		Input:        make(chan QueryWithOutputChannel),
+		asyncQuerier: NewAsyncQuerier(contention),
 	}
-
-	go processAndDispatchQueries(querier.Input, contention)
 	return &querier
 }
 
@@ -98,23 +51,25 @@ func (querier *SyncQuerier) ExecuteQuery(query Query) Query {
 }
 
 func processAndDispatchQueries(input chan QueryWithOutputChannel, contention int) {
-	inputQueries := make(chan Query, 10)
-	processed := make(chan Query, 10)
+	// inputQueries := make(chan Query, 10)
+	// processed := make(chan Query, 10)
 
-	go process(inputQueries, processed, contention)
+	// asyncQuerier := NewAsyncQuerier(contention)
+	// asyncQuerier.process()
+	// go process(inputQueries, processed, contention)
 
-	m := make(map[int]chan Query)
-	i := 0
-	for {
-		select {
-		case queryWithOutputChannel := <-input:
-			queryWithOutputChannel.query.Id = i
-			i += 1
-			m[queryWithOutputChannel.query.Id] = queryWithOutputChannel.responseChannel
-			inputQueries <- queryWithOutputChannel.query
-		case processedQuery := <-processed:
-			m[processedQuery.Id] <- processedQuery
-			delete(m, processedQuery.Id)
-		}
-	}
+	// m := make(map[int]chan Query)
+	// i := 0
+	// for {
+	// 	select {
+	// 	case queryWithOutputChannel := <-input:
+	// 		queryWithOutputChannel.query.Id = i
+	// 		i += 1
+	// 		m[queryWithOutputChannel.query.Id] = queryWithOutputChannel.responseChannel
+	// 		inputQueries <- queryWithOutputChannel.query
+	// 	case processedQuery := <-processed:
+	// 		m[processedQuery.Id] <- processedQuery
+	// 		delete(m, processedQuery.Id)
+	// 	}
+	// }
 }
