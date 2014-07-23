@@ -1,4 +1,4 @@
-package snmpquery
+package gosnmpquerier
 
 type AsyncQuerier struct {
 	Input      chan Query

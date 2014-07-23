@@ -1,4 +1,4 @@
-package snmpquery
+package gosnmpquerier
 
 type SyncQuerier struct {
 	Input        chan QueryWithOutputChannel

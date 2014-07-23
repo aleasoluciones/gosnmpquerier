@@ -1,4 +1,4 @@
-package snmpquery
+package gosnmpquerier
 
 import (
 	"encoding/json"
