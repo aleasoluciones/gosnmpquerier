@@ -50,7 +50,7 @@ func printResults(processed chan snmpquery.Query) {
 
 func main() {
 
-	querier := snmpquery.New(CONTENTION)
+	querier := snmpquery.NewAsyncQuerier(CONTENTION)
 
 	go readQueriesFromStdin(querier.Input)
 

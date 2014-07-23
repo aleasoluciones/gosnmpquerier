@@ -46,7 +46,7 @@ func main() {
 	publishKey := flag.String("publish_key", "", "AMQP routing key")
 	flag.Parse()
 
-	querier := snmpquery.New(CONTENTION)
+	querier := snmpquery.NewAsyncQuerier(CONTENTION)
 	go dispatchFromAmqpToInput(querier.Input, *amqpUri, *sourceExchange, *queue, *bindingKey)
 	publishResults(querier.Output, *amqpUri, *destinationExchange, *publishKey)
 }

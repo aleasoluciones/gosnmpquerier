@@ -62,13 +62,13 @@ type QueryWithOutputChannel struct {
 	responseChannel chan Query
 }
 
-type Querier struct {
+type AsyncQuerier struct {
 	Input  chan Query
 	Output chan Query
 }
 
-func New(contention int) *Querier {
-	querier := Querier{
+func NewAsyncQuerier(contention int) *AsyncQuerier {
+	querier := AsyncQuerier{
 		Input:  make(chan Query, 10),
 		Output: make(chan Query, 10),
 	}
