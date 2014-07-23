@@ -1,10 +1,8 @@
-snmpqueries
-============
+GoSNMPQuerier
+=============
 
+Asynchronous and Synchronous scalable snmpquerier with a maximum number 
+of concurrent snmp queries for each ip/host.
 
+Support for Walk/Get SNMP Queries 
 
-go get github.com/soniah/gosnmp
-go run spikes/walkexample.go <community> <ip> <oid>
-
-
-go get github.com/streadway/amqp
