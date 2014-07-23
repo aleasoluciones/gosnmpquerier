@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/eferro/go-snmpqueries/pkg/snmpquery"
+	"github.com/eferro/gosnmpquerier"
 )
 
 const (
@@ -24,14 +24,14 @@ func readLinesFromStdin(inputLines chan string) {
 	}
 }
 
-func readQueriesFromStdin(input chan snmpquery.Query) {
+func readQueriesFromStdin(input chan gosnmpquerier.Query) {
 
 	inputLines := make(chan string, 10)
 	go readLinesFromStdin(inputLines)
 
 	queryId := 0
 	for line := range inputLines {
-		query, err := snmpquery.FromJson(line)
+		query, err := gosnmpquerier.FromJson(line)
 		if err != nil {
 			fmt.Println("Invalid line:", line, err)
 		} else {
@@ -42,7 +42,7 @@ func readQueriesFromStdin(input chan snmpquery.Query) {
 	}
 }
 
-func printResults(processed chan snmpquery.Query) {
+func printResults(processed chan gosnmpquerier.Query) {
 	for query := range processed {
 		fmt.Println("Result", query)
 	}
@@ -50,7 +50,7 @@ func printResults(processed chan snmpquery.Query) {
 
 func main() {
 
-	querier := snmpquery.NewAsyncQuerier(CONTENTION)
+	querier := gosnmpquerier.NewAsyncQuerier(CONTENTION)
 
 	go readQueriesFromStdin(querier.Input)
 

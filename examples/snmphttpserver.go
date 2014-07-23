@@ -6,17 +6,17 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/eferro/go-snmpqueries/pkg/snmpquery"
+	"github.com/eferro/gosnmpquerier"
 )
 
 const (
 	CONTENTION = 4
 )
 
-func rootHandler(querier *snmpquery.SyncQuerier, w http.ResponseWriter, r *http.Request) {
+func rootHandler(querier *gosnmpquerier.SyncQuerier, w http.ResponseWriter, r *http.Request) {
 
-	cmd, _ := snmpquery.ConvertCommand(r.FormValue("cmd"))
-	query := snmpquery.Query{
+	cmd, _ := gosnmpquerier.ConvertCommand(r.FormValue("cmd"))
+	query := gosnmpquerier.Query{
 		Cmd:         cmd,
 		Community:   r.FormValue("community"),
 		Oid:         r.FormValue("oid"),
@@ -25,7 +25,7 @@ func rootHandler(querier *snmpquery.SyncQuerier, w http.ResponseWriter, r *http.
 		Destination: r.FormValue("destination"),
 	}
 	processed := querier.ExecuteQuery(query)
-	jsonProcessed, err := snmpquery.ToJson(&processed)
+	jsonProcessed, err := gosnmpquerier.ToJson(&processed)
 	if err != nil {
 		fmt.Fprint(w, err)
 	}
@@ -35,7 +35,7 @@ func rootHandler(querier *snmpquery.SyncQuerier, w http.ResponseWriter, r *http.
 
 func main() {
 
-	querier := snmpquery.NewSyncQuerier(CONTENTION)
+	querier := gosnmpquerier.NewSyncQuerier(CONTENTION)
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		rootHandler(querier, w, r)
