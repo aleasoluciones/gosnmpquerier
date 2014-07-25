@@ -55,7 +55,7 @@ func snmpConnection(destination, community string, timeout time.Duration, retrie
 	}
 }
 
-func get(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+func get(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
 	conn := snmpConnection(destination, community, timeout, retries)
 	err := conn.Connect()
 	if err != nil {
@@ -63,7 +63,7 @@ func get(destination, community, oid string, timeout time.Duration, retries int)
 	}
 	defer conn.Conn.Close()
 
-	result, err := conn.Get([]string{oid})
+	result, err := conn.Get(oids)
 	if err != nil {
 		return nil, err
 	}

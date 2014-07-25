@@ -19,7 +19,7 @@ func rootHandler(querier *gosnmpquerier.SyncQuerier, w http.ResponseWriter, r *h
 	query := gosnmpquerier.Query{
 		Cmd:         cmd,
 		Community:   r.FormValue("community"),
-		Oid:         r.FormValue("oid"),
+		Oids:        []string{r.FormValue("oid")},
 		Timeout:     time.Duration(10) * time.Second,
 		Retries:     1,
 		Destination: r.FormValue("destination"),

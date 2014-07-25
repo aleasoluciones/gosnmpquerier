@@ -10,7 +10,7 @@ import data
 def generate_json_command(community):
 	cmd, oid = random.choice(data.commands)
 	destination = random.choice(data.destinations)
-	json_format_string = '{"Command":"%s", "Destination":"%s", "Community":"%s", "Oid":"%s"}'
+	json_format_string = '{"Command":"%s", "Destination":"%s", "Community":"%s", "Oids":["%s"]}'
 	return json_format_string % (cmd, destination, community, oid)
 
 def main():

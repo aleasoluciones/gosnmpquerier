@@ -21,7 +21,7 @@ type Query struct {
 	Id          int
 	Cmd         OpSnmp
 	Community   string
-	Oid         string
+	Oids        []string
 	Timeout     time.Duration
 	Retries     int
 	Destination string

@@ -16,7 +16,7 @@ type queryMessage struct {
 	Command        string
 	Destination    string
 	Community      string
-	Oid            string
+	Oids           []string
 	Timeout        int
 	Retries        int
 	AdditionalInfo interface{}
@@ -26,7 +26,7 @@ type outputMessage struct {
 	Id          int
 	Command     string
 	Community   string
-	Oid         string
+	Oids        []string
 	Timeout     time.Duration
 	Retries     int
 	Destination string
@@ -43,7 +43,7 @@ func ToJson(query *Query) (string, error) {
 		Id:          query.Id,
 		Command:     convertCommandToCommandString(query.Cmd),
 		Community:   query.Community,
-		Oid:         query.Oid,
+		Oids:        query.Oids,
 		Timeout:     query.Timeout,
 		Retries:     query.Retries,
 		Destination: query.Destination,
@@ -79,7 +79,7 @@ func FromJson(jsonText string) (*Query, error) {
 	q := Query{
 		Cmd:         cmd,
 		Community:   m.Community,
-		Oid:         m.Oid,
+		Oids:        m.Oids,
 		Destination: m.Destination,
 		Timeout:     time.Duration(m.Timeout) * time.Second,
 		Retries:     m.Retries,
