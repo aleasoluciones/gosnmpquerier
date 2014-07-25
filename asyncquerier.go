@@ -38,36 +38,45 @@ func (querier *AsyncQuerier) process() {
 	for query := range querier.Input {
 		_, exists := m[query.Destination]
 		if exists == false {
-
-			processorInfo := destinationProcessorInfo{
-				input:  make(chan Query, 10),
-				output: querier.Output,
-				done:   make(chan bool, 1),
-			}
-
+			processorInfo := createProcessorInfo(querier.Output)
 			m[query.Destination] = processorInfo
-			for i := 0; i < querier.Contention; i++ {
-				go processQueriesFromChannel(
-					processorInfo.input,
-					processorInfo.output,
-					processorInfo.done,
-					string(query.Destination)+strconv.Itoa(i))
-			}
+			createProcessors(processorInfo, query.Destination, querier.Contention)
 		}
 		m[query.Destination].input <- query
 	}
 	log.Println("AsyncQuerier process terminating")
 
+	waitUntilProcessorEnd(m, querier.Contention)
+	log.Println("closing output")
+	close(querier.Output)
+}
+func createProcessorInfo(output chan Query) destinationProcessorInfo {
+	return destinationProcessorInfo{
+		input:  make(chan Query, 10),
+		output: output,
+		done:   make(chan bool, 1),
+	}
+}
+
+func createProcessors(processorInfo destinationProcessorInfo, destination string, contention int) {
+	for i := 0; i < contention; i++ {
+		go processQueriesFromChannel(
+			processorInfo.input,
+			processorInfo.output,
+			processorInfo.done,
+			string(destination)+string("_")+strconv.Itoa(i))
+	}
+}
+
+func waitUntilProcessorEnd(m map[string]destinationProcessorInfo, contention int) {
 	for destination, processorInfo := range m {
 		log.Println("closing:", processorInfo.input)
 		close(processorInfo.input)
-		for i := 0; i < querier.Contention; i++ {
+		for i := 0; i < contention; i++ {
 			<-processorInfo.done
 		}
 		delete(m, destination)
 	}
-	log.Println("closing output")
-	close(querier.Output)
 }
 
 func handleQuery(query *Query) {
