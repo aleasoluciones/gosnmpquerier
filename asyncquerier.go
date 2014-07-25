@@ -4,6 +4,11 @@
 
 package gosnmpquerier
 
+import (
+	"log"
+	"strconv"
+)
+
 type AsyncQuerier struct {
 	Input      chan Query
 	Output     chan Query
@@ -20,20 +25,49 @@ func NewAsyncQuerier(contention int) *AsyncQuerier {
 	return &querier
 }
 
+type destinationProcessorInfo struct {
+	input  chan Query
+	output chan Query
+	done   chan bool
+}
+
 func (querier *AsyncQuerier) process() {
-	m := make(map[string]chan Query)
+	log.Println("AsyncQuerier process begin")
+	m := make(map[string]destinationProcessorInfo)
 
 	for query := range querier.Input {
 		_, exists := m[query.Destination]
 		if exists == false {
-			channel_tmp := make(chan Query, 10)
-			m[query.Destination] = channel_tmp
+
+			processorInfo := destinationProcessorInfo{
+				input:  make(chan Query, 10),
+				output: querier.Output,
+				done:   make(chan bool, 1),
+			}
+
+			m[query.Destination] = processorInfo
 			for i := 0; i < querier.Contention; i++ {
-				go processQueriesFromChannel(channel_tmp, querier.Output)
+				go processQueriesFromChannel(
+					processorInfo.input,
+					processorInfo.output,
+					processorInfo.done,
+					string(query.Destination)+strconv.Itoa(i))
 			}
 		}
-		m[query.Destination] <- query
+		m[query.Destination].input <- query
 	}
+	log.Println("AsyncQuerier process terminating")
+
+	for destination, processorInfo := range m {
+		log.Println("closing:", processorInfo.input)
+		close(processorInfo.input)
+		for i := 0; i < querier.Contention; i++ {
+			<-processorInfo.done
+		}
+		delete(m, destination)
+	}
+	log.Println("closing output")
+	close(querier.Output)
 }
 
 func handleQuery(query *Query) {
@@ -45,9 +79,11 @@ func handleQuery(query *Query) {
 	}
 }
 
-func processQueriesFromChannel(input chan Query, processed chan Query) {
+func processQueriesFromChannel(input chan Query, processed chan Query, done chan bool, processorId string) {
 	for query := range input {
 		handleQuery(&query)
 		processed <- query
 	}
+	done <- true
+	log.Println(processorId, "terminated")
 }
