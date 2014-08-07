@@ -4,6 +4,12 @@
 
 package gosnmpquerier
 
+import (
+	"time"
+
+	"github.com/eferro/gosnmp"
+)
+
 type SyncQuerier struct {
 	Input        chan QueryWithOutputChannel
 	asyncQuerier *AsyncQuerier
@@ -23,6 +29,34 @@ func (querier *SyncQuerier) ExecuteQuery(query Query) Query {
 	querier.Input <- QueryWithOutputChannel{query, output}
 	processedQuery := <-output
 	return processedQuery
+}
+
+func (querier *SyncQuerier) Get(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+	query := Query{
+		Cmd:         GET,
+		Community:   community,
+		Oids:        oids,
+		Timeout:     timeout,
+		Retries:     retries,
+		Destination: destination,
+	}
+
+	processedQuery := querier.ExecuteQuery(query)
+	return processedQuery.Response, processedQuery.Error
+}
+
+func (querier *SyncQuerier) Walk(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+	query := Query{
+		Cmd:         WALK,
+		Community:   community,
+		Oids:        []string{oid},
+		Timeout:     timeout,
+		Retries:     retries,
+		Destination: destination,
+	}
+
+	processedQuery := querier.ExecuteQuery(query)
+	return processedQuery.Response, processedQuery.Error
 }
 
 func (querier *SyncQuerier) processAndDispatchQueries() {
