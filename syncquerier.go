@@ -45,6 +45,20 @@ func (querier *SyncQuerier) Get(destination, community string, oids []string, ti
 	return processedQuery.Response, processedQuery.Error
 }
 
+func (querier *SyncQuerier) GetNext(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+	query := Query{
+		Cmd:         GETNEXT,
+		Community:   community,
+		Oids:        oids,
+		Timeout:     timeout,
+		Retries:     retries,
+		Destination: destination,
+	}
+
+	processedQuery := querier.ExecuteQuery(query)
+	return processedQuery.Response, processedQuery.Error
+}
+
 func (querier *SyncQuerier) Walk(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
 	query := Query{
 		Cmd:         WALK,

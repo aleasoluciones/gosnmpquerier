@@ -74,3 +74,23 @@ func get(destination, community string, oids []string, timeout time.Duration, re
 	}
 	return pdus, nil
 }
+
+func getnext(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+	conn := snmpConnection(destination, community, timeout, retries)
+	err := conn.Connect()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Conn.Close()
+
+	result, err := conn.GetNext(oids)
+	if err != nil {
+		return nil, err
+	}
+
+	pdus := []gosnmp.SnmpPDU{}
+	for _, pdu := range result.Variables {
+		pdus = append(pdus, pdu)
+	}
+	return pdus, nil
+}

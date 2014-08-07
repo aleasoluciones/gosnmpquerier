@@ -91,7 +91,10 @@ func handleQuery(query *Query) {
 
 	case GET:
 		query.Response, query.Error = get(query.Destination, query.Community, query.Oids, query.Timeout, query.Retries)
+	case GETNEXT:
+		query.Response, query.Error = getnext(query.Destination, query.Community, query.Oids, query.Timeout, query.Retries)
 	}
+
 }
 
 func processQueriesFromChannel(input chan Query, processed chan Query, done chan bool, processorId string) {

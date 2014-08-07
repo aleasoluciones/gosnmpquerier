@@ -13,8 +13,10 @@ import (
 type OpSnmp int32
 
 const (
-	GET  = 0
-	WALK = 1
+	_ = iota // skip 0
+	GET
+	GETNEXT
+	WALK
 )
 
 type Query struct {
