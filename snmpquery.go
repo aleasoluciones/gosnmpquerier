@@ -5,33 +5,33 @@
 package gosnmpquerier
 
 import (
-	"time"
+    "time"
 
-	"github.com/eferro/gosnmp"
+    "github.com/soniah/gosnmp"
 )
 
 type OpSnmp int32
 
 const (
-	_ = iota // skip 0
-	GET
-	GETNEXT
-	WALK
+    _   = iota // skip 0
+    GET
+    GETNEXT
+    WALK
 )
 
 type Query struct {
-	Id          int
-	Cmd         OpSnmp
-	Community   string
-	Oids        []string
-	Timeout     time.Duration
-	Retries     int
-	Destination string
-	Response    []gosnmp.SnmpPDU
-	Error       error
+    Id          int
+    Cmd         OpSnmp
+    Community   string
+    Oids        []string
+    Timeout     time.Duration
+    Retries     int
+    Destination string
+    Response    []gosnmp.SnmpPDU
+    Error       error
 }
 
 type QueryWithOutputChannel struct {
-	query           Query
-	responseChannel chan Query
+    query           Query
+    responseChannel chan Query
 }
