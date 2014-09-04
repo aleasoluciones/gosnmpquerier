@@ -46,31 +46,8 @@ func (snmpClient *SnmpClient) walk(destination, community, oid string, timeout t
 		return nil, err
 	}
 	defer conn.Conn.Close()
-	output := make(chan gosnmp.SnmpPDU)
-	errChannel := make(chan error, 1)
-	go doWalk(conn, oid, output, errChannel)
 
-	result := []gosnmp.SnmpPDU{}
-	for pdu := range output {
-		result = append(result, pdu)
-	}
-	if len(errChannel) != 0 {
-		err := <-errChannel
-		return nil, err
-	}
-	return result, nil
-}
-
-func doWalk(conn gosnmp.GoSNMP, oid string, output chan gosnmp.SnmpPDU, errChannel chan error) {
-	processPDU := func(pdu gosnmp.SnmpPDU) error {
-		output <- pdu
-		return nil
-	}
-	err := conn.BulkWalk(oid, processPDU)
-	if err != nil {
-		errChannel <- err
-	}
-	close(output)
+	return conn.BulkWalkAll(oid)
 }
 
 func snmpConnection(destination, community string, timeout time.Duration, retries int) gosnmp.GoSNMP {
