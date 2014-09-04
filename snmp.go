@@ -10,6 +10,40 @@ import (
 	"github.com/eferro/gosnmp"
 )
 
+type SnmpClient struct {
+}
+
+func newSnmpClient() *SnmpClient {
+	return &SnmpClient{}
+}
+
+func (snmpClient *SnmpClient) get(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+
+	conn := snmpConnection(destination, community, timeout, retries)
+	err := conn.Connect()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Conn.Close()
+
+	result, err := conn.Get(oids)
+	if err != nil {
+		return nil, err
+	}
+
+	pdus := []gosnmp.SnmpPDU{}
+	for _, pdu := range result.Variables {
+		pdus = append(pdus, pdu)
+	}
+	return pdus, nil
+
+}
+
+// snmp
+// snmp.walk(destination, communituy, oid, timeout, retries)
+// snmp.get(destination, communituy, oids[], timeout, retries)
+// snmp.getnext()
+
 func walk(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
 	conn := snmpConnection(destination, community, timeout, retries)
 	err := conn.Connect()
@@ -53,26 +87,6 @@ func snmpConnection(destination, community string, timeout time.Duration, retrie
 		Timeout:   timeout,
 		Retries:   retries,
 	}
-}
-
-func get(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
-	conn := snmpConnection(destination, community, timeout, retries)
-	err := conn.Connect()
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Conn.Close()
-
-	result, err := conn.Get(oids)
-	if err != nil {
-		return nil, err
-	}
-
-	pdus := []gosnmp.SnmpPDU{}
-	for _, pdu := range result.Variables {
-		pdus = append(pdus, pdu)
-	}
-	return pdus, nil
 }
 
 func getnext(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
