@@ -81,19 +81,18 @@ func waitUntilProcessorEnd(m map[string]destinationProcessorInfo, contention int
 }
 
 func handleQuery(query *Query) {
+	snmpClient := newSnmpClient()
 	switch query.Cmd {
 	case WALK:
 		if len(query.Oids) == 1 {
-			query.Response, query.Error = walk(query.Destination, query.Community, query.Oids[0], query.Timeout, query.Retries)
+			query.Response, query.Error = snmpClient.walk(query.Destination, query.Community, query.Oids[0], query.Timeout, query.Retries)
 		} else {
 			query.Error = fmt.Errorf("Multi Oid Walk not supported")
 		}
-
 	case GET:
-		snmpClient := newSnmpClient()
 		query.Response, query.Error = snmpClient.get(query.Destination, query.Community, query.Oids, query.Timeout, query.Retries)
 	case GETNEXT:
-		query.Response, query.Error = getnext(query.Destination, query.Community, query.Oids, query.Timeout, query.Retries)
+		query.Response, query.Error = snmpClient.getnext(query.Destination, query.Community, query.Oids, query.Timeout, query.Retries)
 	}
 
 }

@@ -5,106 +5,101 @@
 package gosnmpquerier
 
 import (
-    "time"
+	"time"
 
-    "github.com/soniah/gosnmp"
+	"github.com/soniah/gosnmp"
 )
 
 type SnmpClient struct {
 }
 
 func newSnmpClient() *SnmpClient {
-    return &SnmpClient{}
+	return &SnmpClient{}
 }
 
 func (snmpClient *SnmpClient) get(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
 
-    conn := snmpConnection(destination, community, timeout, retries)
-    err := conn.Connect()
-    if err != nil {
-        return nil, err
-    }
-    defer conn.Conn.Close()
+	conn := snmpConnection(destination, community, timeout, retries)
+	err := conn.Connect()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Conn.Close()
 
-    result, err := conn.Get(oids)
-    if err != nil {
-        return nil, err
-    }
+	result, err := conn.Get(oids)
+	if err != nil {
+		return nil, err
+	}
 
-    pdus := []gosnmp.SnmpPDU{}
-    for _, pdu := range result.Variables {
-        pdus = append(pdus, pdu)
-    }
-    return pdus, nil
+	pdus := []gosnmp.SnmpPDU{}
+	for _, pdu := range result.Variables {
+		pdus = append(pdus, pdu)
+	}
+	return pdus, nil
 
 }
 
-// snmp
-// snmp.walk(destination, communituy, oid, timeout, retries)
-// snmp.get(destination, communituy, oids[], timeout, retries)
-// snmp.getnext()
+func (snmpClient *SnmpClient) walk(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+	conn := snmpConnection(destination, community, timeout, retries)
+	err := conn.Connect()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Conn.Close()
+	output := make(chan gosnmp.SnmpPDU)
+	errChannel := make(chan error, 1)
+	go doWalk(conn, oid, output, errChannel)
 
-func walk(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
-    conn := snmpConnection(destination, community, timeout, retries)
-    err := conn.Connect()
-    if err != nil {
-        return nil, err
-    }
-    defer conn.Conn.Close()
-    output := make(chan gosnmp.SnmpPDU)
-    errChannel := make(chan error, 1)
-    go doWalk(conn, oid, output, errChannel)
-
-    result := []gosnmp.SnmpPDU{}
-    for pdu := range output {
-        result = append(result, pdu)
-    }
-    if len(errChannel) != 0 {
-        err := <-errChannel
-        return nil, err
-    }
-    return result, nil
+	result := []gosnmp.SnmpPDU{}
+	for pdu := range output {
+		result = append(result, pdu)
+	}
+	if len(errChannel) != 0 {
+		err := <-errChannel
+		return nil, err
+	}
+	return result, nil
 }
 
 func doWalk(conn gosnmp.GoSNMP, oid string, output chan gosnmp.SnmpPDU, errChannel chan error) {
-    processPDU := func(pdu gosnmp.SnmpPDU) error {
-        output <- pdu
-        return nil
-    }
-    err := conn.BulkWalk(oid, processPDU)
-    if err != nil {
-        errChannel <- err
-    }
-    close(output)
+	processPDU := func(pdu gosnmp.SnmpPDU) error {
+		output <- pdu
+		return nil
+	}
+	err := conn.BulkWalk(oid, processPDU)
+	if err != nil {
+		errChannel <- err
+	}
+	close(output)
 }
 
 func snmpConnection(destination, community string, timeout time.Duration, retries int) gosnmp.GoSNMP {
-    return gosnmp.GoSNMP{
-        Target:    destination,
-        Port:      161,
-        Community: community,
-        Version:   gosnmp.Version2c,
-        Timeout:   timeout,
-        Retries:   retries,
-    }
+	return gosnmp.GoSNMP{
+		Target:    destination,
+		Port:      161,
+		Community: community,
+		Version:   gosnmp.Version2c,
+		Timeout:   timeout,
+		Retries:   retries,
+	}
 }
 
-func getnext(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
-    conn := snmpConnection(destination, community, timeout, retries)
-    err := conn.Connect()
-    if err != nil {
-        return nil, err
-    }
-    defer conn.Conn.Close()
+func (snmpClient *SnmpClient) getnext(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+	conn := snmpConnection(destination, community, timeout, retries)
+	err := conn.Connect()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Conn.Close()
 
-    result, err := conn.GetNext(oids)
-    if err != nil {
-        return nil, err
-    }
+	result, err := conn.GetNext(oids)
+	if err != nil {
+		return nil, err
+	}
 
-    pdus := []gosnmp.SnmpPDU{}
-    for _, pdu := range result.Variables {
-        pdus = append(pdus, pdu)
-    }
-    return pdus, nil
+	pdus := []gosnmp.SnmpPDU{}
+	for _, pdu := range result.Variables {
+		pdus = append(pdus, pdu)
+	}
+	return pdus, nil
 }
