@@ -14,7 +14,7 @@ type AsyncQuerier struct {
 	Input      chan Query
 	Output     chan Query
 	Contention int
-	SnmpClient SnmpClient
+	snmpClient *SnmpClient
 }
 
 func NewAsyncQuerier(contention int) *AsyncQuerier {
@@ -22,7 +22,7 @@ func NewAsyncQuerier(contention int) *AsyncQuerier {
 		Input:      make(chan Query, 10),
 		Output:     make(chan Query, 10),
 		Contention: contention,
-		SnmpClient: newSnmpClient(),
+		snmpClient: newSnmpClient(),
 	}
 	go querier.process()
 	return &querier
@@ -61,8 +61,8 @@ func createProcessorInfo(output chan Query) destinationProcessorInfo {
 	}
 }
 
-func createProcessors(processorInfo destinationProcessorInfo, AsyncQuerier querier, destination string) {
-	for i := 0; i < querier.contention; i++ {
+func createProcessors(processorInfo destinationProcessorInfo, querier *AsyncQuerier, destination string) {
+	for i := 0; i < querier.Contention; i++ {
 		go processQueriesFromChannel(
 			querier,
 			processorInfo.input,
@@ -87,18 +87,18 @@ func (querier *AsyncQuerier) handleQuery(query *Query) {
 	switch query.Cmd {
 	case WALK:
 		if len(query.Oids) == 1 {
-			query.Response, query.Error = querier.SnmpClient.walk(query.Destination, query.Community, query.Oids[0], query.Timeout, query.Retries)
+			query.Response, query.Error = querier.snmpClient.walk(query.Destination, query.Community, query.Oids[0], query.Timeout, query.Retries)
 		} else {
 			query.Error = fmt.Errorf("Multi Oid Walk not supported")
 		}
 	case GET:
-		query.Response, query.Error = querier.SnmpClient.get(query.Destination, query.Community, query.Oids, query.Timeout, query.Retries)
+		query.Response, query.Error = querier.snmpClient.get(query.Destination, query.Community, query.Oids, query.Timeout, query.Retries)
 	case GETNEXT:
-		query.Response, query.Error = querier.SnmpClient.getnext(query.Destination, query.Community, query.Oids, query.Timeout, query.Retries)
+		query.Response, query.Error = querier.snmpClient.getnext(query.Destination, query.Community, query.Oids, query.Timeout, query.Retries)
 	}
 }
 
-func processQueriesFromChannel(AsyncQuerier querier, input chan Query, processed chan Query, done chan bool, processorId string) {
+func processQueriesFromChannel(querier *AsyncQuerier, input chan Query, processed chan Query, done chan bool, processorId string) {
 	for query := range input {
 		querier.handleQuery(&query)
 		processed <- query
