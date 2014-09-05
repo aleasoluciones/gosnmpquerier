@@ -10,15 +10,20 @@ import (
 	"github.com/soniah/gosnmp"
 )
 
-type SnmpClient struct {
+type SnmpClient interface {
+	get(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error)
+	walk(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error)
+	getnext(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error)
 }
 
-func newSnmpClient() *SnmpClient {
-	return &SnmpClient{}
+type GoSnmpClient struct {
 }
 
-func (snmpClient *SnmpClient) get(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+func newSnmpClient() *GoSnmpClient {
+	return &GoSnmpClient{}
+}
 
+func (snmpClient *GoSnmpClient) get(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
 	conn := snmpConnection(destination, community, timeout, retries)
 	err := conn.Connect()
 	if err != nil {
@@ -39,7 +44,7 @@ func (snmpClient *SnmpClient) get(destination, community string, oids []string, 
 
 }
 
-func (snmpClient *SnmpClient) walk(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+func (snmpClient *GoSnmpClient) walk(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
 	conn := snmpConnection(destination, community, timeout, retries)
 	err := conn.Connect()
 	if err != nil {
@@ -61,7 +66,7 @@ func snmpConnection(destination, community string, timeout time.Duration, retrie
 	}
 }
 
-func (snmpClient *SnmpClient) getnext(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+func (snmpClient *GoSnmpClient) getnext(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
 	conn := snmpConnection(destination, community, timeout, retries)
 	err := conn.Connect()
 	if err != nil {

@@ -14,7 +14,7 @@ type AsyncQuerier struct {
 	Input      chan Query
 	Output     chan Query
 	Contention int
-	snmpClient *SnmpClient
+	snmpClient SnmpClient
 }
 
 func NewAsyncQuerier(contention int) *AsyncQuerier {
