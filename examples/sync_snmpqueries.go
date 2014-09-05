@@ -5,23 +5,21 @@
 package main
 
 import (
-    "fmt"
-
-    "github.com/soniah/gosnmp"
+	"fmt"
 )
 
 const (
-    CONTENTION = 4
+	CONTENTION = 4
 )
 
 func main() {
 
-    querier := gosnmpquerier.NewSyncQuerier(CONTENTION)
+	querier := gosnmpquerier.NewSyncQuerier(CONTENTION)
 
-    for id := 0; id < 10; id++ {
-        q, _ := gosnmpquerier.FromJson(`{"command":"walk", "destination":"localhost", "community":"public", "oids":["1.3.6.1"]}`)
-        q.Id = id
+	for id := 0; id < 10; id++ {
+		q, _ := gosnmpquerier.FromJson(`{"command":"walk", "destination":"localhost", "community":"public", "oids":["1.3.6.1"]}`)
+		q.Id = id
 
-        fmt.Println("Result:", querier.ExecuteQuery(*q))
-    }
+		fmt.Println("Result:", querier.ExecuteQuery(*q))
+	}
 }
