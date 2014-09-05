@@ -11,5 +11,9 @@ before_install:
   - go get github.com/mattn/goveralls
   - go get code.google.com/p/go.tools/cmd/cover
 
+install:
+  - go get -d -v .
+  - go build -v .
+
 script:
   - go test -v ./...
