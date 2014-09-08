@@ -27,7 +27,7 @@ func makeSnmpPDu() ([]gosnmp.SnmpPDU, error) {
 }
 
 func syncQuerier() *SyncQuerier {
-	querier := NewSyncQuerier(1)
+	querier := NewSyncQuerier(1, 3, 3*time.Second)
 	querier.asyncQuerier.snmpClient = &FakeSnmpClient{}
 	return querier
 }

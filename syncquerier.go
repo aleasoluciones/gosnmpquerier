@@ -5,20 +5,24 @@
 package gosnmpquerier
 
 import (
+	"fmt"
 	"time"
 
+	"github.com/aleasoluciones/gocircuitbreaker"
 	"github.com/soniah/gosnmp"
 )
 
 type SyncQuerier struct {
-	Input        chan QueryWithOutputChannel
-	asyncQuerier *AsyncQuerier
+	Input          chan QueryWithOutputChannel
+	asyncQuerier   *AsyncQuerier
+	circuitBreaker *circuitbreaker.Circuit
 }
 
-func NewSyncQuerier(contention int) *SyncQuerier {
+func NewSyncQuerier(contention, numErrors int, resetTime time.Duration) *SyncQuerier {
 	querier := SyncQuerier{
-		Input:        make(chan QueryWithOutputChannel),
-		asyncQuerier: NewAsyncQuerier(contention),
+		Input:          make(chan QueryWithOutputChannel),
+		asyncQuerier:   NewAsyncQuerier(contention),
+		circuitBreaker: circuitbreaker.NewCircuit(numErrors, resetTime),
 	}
 	go querier.processAndDispatchQueries()
 	return &querier
@@ -27,8 +31,7 @@ func NewSyncQuerier(contention int) *SyncQuerier {
 func (querier *SyncQuerier) ExecuteQuery(query Query) Query {
 	output := make(chan Query)
 	querier.Input <- QueryWithOutputChannel{query, output}
-	processedQuery := <-output
-	return processedQuery
+	return <-output
 }
 
 func (querier *SyncQuerier) Get(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
@@ -44,8 +47,12 @@ func (querier *SyncQuerier) Walk(destination, community, oid string, timeout tim
 }
 
 func (querier *SyncQuerier) executeCommand(command OpSnmp, destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+	if querier.circuitBreaker.IsOpen() {
+		return nil, fmt.Errorf("Destination device unavailable %s", destination)
+	}
 	query := querier.makeQuery(command, destination, community, oids, timeout, retries)
 	processedQuery := querier.ExecuteQuery(query)
+	querier.reportCircuitStatus(processedQuery.Error)
 	return processedQuery.Response, processedQuery.Error
 }
 
@@ -57,6 +64,14 @@ func (querier *SyncQuerier) makeQuery(command OpSnmp, destination, community str
 		Timeout:     timeout,
 		Retries:     retries,
 		Destination: destination,
+	}
+}
+
+func (querier *SyncQuerier) reportCircuitStatus(err error) {
+	if err == nil {
+		querier.circuitBreaker.Ok()
+	} else {
+		querier.circuitBreaker.Error()
 	}
 }
 
