@@ -88,7 +88,7 @@ func (querier *AsyncQuerier) handleQuery(query *Query) {
 		if len(query.Oids) == 1 {
 			query.Response, query.Error = querier.snmpClient.walk(query.Destination, query.Community, query.Oids[0], query.Timeout, query.Retries)
 		} else {
-			query.Error = fmt.Errorf("Multi Oid Walk not supported")
+			query.Error = fmt.Errorf("multi Oid Walk not supported")
 		}
 	case GET:
 		query.Response, query.Error = querier.snmpClient.get(query.Destination, query.Community, query.Oids, query.Timeout, query.Retries)

@@ -16,8 +16,7 @@ type SnmpClient interface {
 	getnext(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error)
 }
 
-type GoSnmpClient struct {
-}
+type GoSnmpClient struct{}
 
 func newSnmpClient() *GoSnmpClient {
 	return &GoSnmpClient{}

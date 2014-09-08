@@ -103,6 +103,6 @@ func ConvertCommand(command string) (OpSnmp, error) {
 	case "get":
 		return GET, nil
 	default:
-		return 0, fmt.Errorf("Unsupported command %s ", command)
+		return 0, fmt.Errorf("unsupported command %s", command)
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/aleasoluciones/gosnmpquerier"
 	"github.com/streadway/amqp"
 )
 
@@ -16,13 +17,13 @@ func publish(amqpURI, exchange, routingKey, body string, reliable bool) error {
 
 	connection, err := amqp.Dial(amqpURI)
 	if err != nil {
-		return fmt.Errorf("Dial: %s", err)
+		return fmt.Errorf("dial: %s", err)
 	}
 	defer connection.Close()
 
 	channel, err := connection.Channel()
 	if err != nil {
-		return fmt.Errorf("Channel: %s", err)
+		return fmt.Errorf("channel: %s", err)
 	}
 
 	// Reliable publisher confirms require confirm.select support from the
@@ -30,7 +31,7 @@ func publish(amqpURI, exchange, routingKey, body string, reliable bool) error {
 	if reliable {
 		log.Printf("enabling publishing confirms.")
 		if err := channel.Confirm(false); err != nil {
-			return fmt.Errorf("Channel could not be put into confirm mode: %s", err)
+			return fmt.Errorf("channel could not be put into confirm mode: %s", err)
 		}
 
 		ack, nack := channel.NotifyConfirm(make(chan uint64, 1), make(chan uint64, 1))
@@ -53,7 +54,7 @@ func publish(amqpURI, exchange, routingKey, body string, reliable bool) error {
 			// a bunch of application/implementation-specific fields
 		},
 	); err != nil {
-		return fmt.Errorf("Exchange Publish: %s", err)
+		return fmt.Errorf("exchange Publish: %s", err)
 	}
 
 	return nil

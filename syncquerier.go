@@ -48,7 +48,7 @@ func (querier *SyncQuerier) Walk(destination, community, oid string, timeout tim
 
 func (querier *SyncQuerier) executeCommand(command OpSnmp, destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
 	if querier.circuitBreaker.IsOpen() {
-		return nil, fmt.Errorf("Destination device unavailable %s", destination)
+		return nil, fmt.Errorf("destination device unavailable %s", destination)
 	}
 	query := querier.makeQuery(command, destination, community, oids, timeout, retries)
 	processedQuery := querier.ExecuteQuery(query)
