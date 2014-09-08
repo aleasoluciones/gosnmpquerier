@@ -16,5 +16,8 @@ func main() {
 
 	querier := gosnmpquerier.NewSyncQuerier(1)
 	result, err := querier.Get(*host, *community, []string{*oid}, 1*time.Second, 1)
+	result2, err2 := querier.Get(*host, *community, []string{*oid}, 1*time.Second, 1)
 	fmt.Println(result, err)
+	fmt.Println()
+	fmt.Println(result2, err2)
 }
