@@ -14,7 +14,7 @@ func main() {
 	oid := flag.String("oid", "1.3.6.1.2.1.1", "RootOid for the walk")
 	flag.Parse()
 
-	querier := gosnmpquerier.NewSyncQuerier(1)
+	querier := gosnmpquerier.NewSyncQuerier(1, 3, 3*time.Second)
 	result, err := querier.Walk(*host, *community, *oid, 1*time.Second, 1)
 	if err == nil {
 		for _, r := range result {

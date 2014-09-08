@@ -25,8 +25,7 @@ func newSnmpClient() *GoSnmpClient {
 
 func (snmpClient *GoSnmpClient) get(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
 	conn := snmpConnection(destination, community, timeout, retries)
-	err := conn.Connect()
-	if err != nil {
+	if err := conn.Connect(); err != nil {
 		return nil, err
 	}
 	defer conn.Conn.Close()
@@ -46,8 +45,7 @@ func (snmpClient *GoSnmpClient) get(destination, community string, oids []string
 
 func (snmpClient *GoSnmpClient) walk(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
 	conn := snmpConnection(destination, community, timeout, retries)
-	err := conn.Connect()
-	if err != nil {
+	if err := conn.Connect(); err != nil {
 		return nil, err
 	}
 	defer conn.Conn.Close()
@@ -68,8 +66,7 @@ func snmpConnection(destination, community string, timeout time.Duration, retrie
 
 func (snmpClient *GoSnmpClient) getnext(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
 	conn := snmpConnection(destination, community, timeout, retries)
-	err := conn.Connect()
-	if err != nil {
+	if err := conn.Connect(); err != nil {
 		return nil, err
 	}
 	defer conn.Conn.Close()

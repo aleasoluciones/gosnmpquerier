@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/aleasoluciones/gosnmpquerier"
 )
 
 const (
@@ -33,7 +35,7 @@ func rootHandler(querier *gosnmpquerier.SyncQuerier, w http.ResponseWriter, r *h
 
 func main() {
 
-	querier := gosnmpquerier.NewSyncQuerier(CONTENTION)
+	querier := gosnmpquerier.NewSyncQuerier(CONTENTION, 3, 3*time.Second)
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		rootHandler(querier, w, r)

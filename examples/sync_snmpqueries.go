@@ -6,6 +6,9 @@ package main
 
 import (
 	"fmt"
+	"time"
+
+	"github.com/aleasoluciones/gosnmpquerier"
 )
 
 const (
@@ -14,7 +17,7 @@ const (
 
 func main() {
 
-	querier := gosnmpquerier.NewSyncQuerier(CONTENTION)
+	querier := gosnmpquerier.NewSyncQuerier(CONTENTION, 3, 3*time.Second)
 
 	for id := 0; id < 10; id++ {
 		q, _ := gosnmpquerier.FromJson(`{"command":"walk", "destination":"localhost", "community":"public", "oids":["1.3.6.1"]}`)

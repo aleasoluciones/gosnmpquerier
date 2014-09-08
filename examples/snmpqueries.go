@@ -8,6 +8,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+
+	"github.com/aleasoluciones/gosnmpquerier"
 )
 
 const (
@@ -52,8 +54,7 @@ func printResults(processed chan gosnmpquerier.Query) {
 }
 
 func main() {
-
-	querier := gosnmpquerier.NewAsyncQuerier(CONTENTION)
+	querier := gosnmpquerier.NewAsyncQuerier(CONTENTION, 3, 3*Second)
 
 	go readQueriesFromStdin(querier.Input)
 

@@ -39,8 +39,7 @@ func (querier *AsyncQuerier) process() {
 	m := make(map[string]destinationProcessorInfo)
 
 	for query := range querier.Input {
-		_, exists := m[query.Destination]
-		if exists == false {
+		if _, exists := m[query.Destination]; exists == false {
 			processorInfo := createProcessorInfo(querier.Output)
 			m[query.Destination] = processorInfo
 			createProcessors(processorInfo, querier, query.Destination)
