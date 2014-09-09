@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aleasoluciones/gocircuitbreaker"
+	"github.com/aleasoluciones/goaleasoluciones/circuitbreaker"
 	"github.com/soniah/gosnmp"
 )
 
