@@ -12,14 +12,21 @@ import (
 	"github.com/soniah/gosnmp"
 )
 
-type SyncQuerier struct {
+type SyncQuerier interface {
+	ExecuteQuery(query Query) Query
+	Get(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error)
+	GetNext(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error)
+	Walk(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error)
+}
+
+type syncQuerier struct {
 	Input          chan QueryWithOutputChannel
 	asyncQuerier   *AsyncQuerier
 	circuitBreaker *circuitbreaker.Circuit
 }
 
-func NewSyncQuerier(contention, numErrors int, resetTime time.Duration) *SyncQuerier {
-	querier := SyncQuerier{
+func NewSyncQuerier(contention, numErrors int, resetTime time.Duration) *syncQuerier {
+	querier := syncQuerier{
 		Input:          make(chan QueryWithOutputChannel),
 		asyncQuerier:   NewAsyncQuerier(contention),
 		circuitBreaker: circuitbreaker.NewCircuit(numErrors, resetTime),
@@ -28,25 +35,25 @@ func NewSyncQuerier(contention, numErrors int, resetTime time.Duration) *SyncQue
 	return &querier
 }
 
-func (querier *SyncQuerier) ExecuteQuery(query Query) Query {
+func (querier *syncQuerier) ExecuteQuery(query Query) Query {
 	output := make(chan Query)
 	querier.Input <- QueryWithOutputChannel{query, output}
 	return <-output
 }
 
-func (querier *SyncQuerier) Get(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+func (querier *syncQuerier) Get(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
 	return querier.executeCommand(GET, destination, community, oids, timeout, retries)
 }
 
-func (querier *SyncQuerier) GetNext(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+func (querier *syncQuerier) GetNext(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
 	return querier.executeCommand(GETNEXT, destination, community, oids, timeout, retries)
 }
 
-func (querier *SyncQuerier) Walk(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+func (querier *syncQuerier) Walk(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
 	return querier.executeCommand(WALK, destination, community, []string{oid}, timeout, retries)
 }
 
-func (querier *SyncQuerier) executeCommand(command OpSnmp, destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+func (querier *syncQuerier) executeCommand(command OpSnmp, destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
 	if querier.circuitBreaker.IsOpen() {
 		return nil, fmt.Errorf("destination device unavailable %s", destination)
 	}
@@ -56,7 +63,7 @@ func (querier *SyncQuerier) executeCommand(command OpSnmp, destination, communit
 	return processedQuery.Response, processedQuery.Error
 }
 
-func (querier *SyncQuerier) makeQuery(command OpSnmp, destination, community string, oids []string, timeout time.Duration, retries int) Query {
+func (querier *syncQuerier) makeQuery(command OpSnmp, destination, community string, oids []string, timeout time.Duration, retries int) Query {
 	return Query{
 		Cmd:         command,
 		Community:   community,
@@ -67,7 +74,7 @@ func (querier *SyncQuerier) makeQuery(command OpSnmp, destination, community str
 	}
 }
 
-func (querier *SyncQuerier) reportCircuitStatus(err error) {
+func (querier *syncQuerier) reportCircuitStatus(err error) {
 	if err == nil {
 		querier.circuitBreaker.Ok()
 	} else {
@@ -75,7 +82,7 @@ func (querier *SyncQuerier) reportCircuitStatus(err error) {
 	}
 }
 
-func (querier *SyncQuerier) processAndDispatchQueries() {
+func (querier *syncQuerier) processAndDispatchQueries() {
 	m := make(map[int]chan Query)
 	i := 0
 	for {

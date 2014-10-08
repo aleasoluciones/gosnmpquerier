@@ -26,7 +26,7 @@ func makeSnmpPDu() ([]gosnmp.SnmpPDU, error) {
 	return []gosnmp.SnmpPDU{gosnmp.SnmpPDU{Name: "foo", Type: 1, Value: 1}}, nil
 }
 
-func syncQuerier() *SyncQuerier {
+func newSyncQuerier() *syncQuerier {
 	querier := NewSyncQuerier(1, 3, 3*time.Second)
 	querier.asyncQuerier.snmpClient = &FakeSnmpClient{}
 	return querier
@@ -36,19 +36,19 @@ func expectedSnmpResult() []gosnmp.SnmpPDU {
 	return []gosnmp.SnmpPDU{gosnmp.SnmpPDU{Name: "foo", Type: 0x1, Value: 1}}
 }
 func TestGetReturnsSnmpGetResult(t *testing.T) {
-	querier := syncQuerier()
+	querier := newSyncQuerier()
 	result, _ := querier.Get("192.168.5.15", "alea2", []string{"1.3.6.1.2.1.1.1.0"}, 1*time.Second, 1)
 	assert.Equal(t, result, expectedSnmpResult())
 }
 
 func TestGetNextReturnsSnmpGetNextResult(t *testing.T) {
-	querier := syncQuerier()
+	querier := newSyncQuerier()
 	result, _ := querier.GetNext("192.168.5.15", "alea2", []string{"1.3.6.1.2.1.1.1.0"}, 1*time.Second, 1)
 	assert.Equal(t, result, expectedSnmpResult())
 }
 
 func TestWalkReturnsSnmpWalkResult(t *testing.T) {
-	querier := syncQuerier()
+	querier := newSyncQuerier()
 	result, _ := querier.Walk("192.168.5.15", "alea2", "1.3.6.1.2.1.1", 1*time.Second, 1)
 	assert.Equal(t, result, expectedSnmpResult())
 }
