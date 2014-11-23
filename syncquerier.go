@@ -5,10 +5,8 @@
 package gosnmpquerier
 
 import (
-	"fmt"
 	"time"
 
-	"github.com/aleasoluciones/goaleasoluciones/circuitbreaker"
 	"github.com/soniah/gosnmp"
 )
 
@@ -22,14 +20,12 @@ type SyncQuerier interface {
 type syncQuerier struct {
 	Input          chan QueryWithOutputChannel
 	asyncQuerier   *AsyncQuerier
-	circuitBreaker *circuitbreaker.Circuit
 }
 
 func NewSyncQuerier(contention, numErrors int, resetTime time.Duration) *syncQuerier {
 	querier := syncQuerier{
 		Input:          make(chan QueryWithOutputChannel),
 		asyncQuerier:   NewAsyncQuerier(contention),
-		circuitBreaker: circuitbreaker.NewCircuit(numErrors, resetTime),
 	}
 	go querier.processAndDispatchQueries()
 	return &querier
@@ -54,12 +50,8 @@ func (querier *syncQuerier) Walk(destination, community, oid string, timeout tim
 }
 
 func (querier *syncQuerier) executeCommand(command OpSnmp, destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
-	if querier.circuitBreaker.IsOpen() {
-		return nil, fmt.Errorf("destination device unavailable %s", destination)
-	}
 	query := querier.makeQuery(command, destination, community, oids, timeout, retries)
 	processedQuery := querier.ExecuteQuery(query)
-	querier.reportCircuitStatus(processedQuery.Error)
 	return processedQuery.Response, processedQuery.Error
 }
 
@@ -71,14 +63,6 @@ func (querier *syncQuerier) makeQuery(command OpSnmp, destination, community str
 		Timeout:     timeout,
 		Retries:     retries,
 		Destination: destination,
-	}
-}
-
-func (querier *syncQuerier) reportCircuitStatus(err error) {
-	if err == nil {
-		querier.circuitBreaker.Ok()
-	} else {
-		querier.circuitBreaker.Error()
 	}
 }
 
