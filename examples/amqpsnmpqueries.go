@@ -4,13 +4,16 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/aleasoluciones/gosnmpquerier"
 	"github.com/streadway/amqp"
 )
 
 const (
-	CONTENTION = 4
+	CONTENTION                = 4
+	CIRCUIT_BREAKER_ERRORS    = 4
+	CIRCUIT_BREAKER_RESETTIME = 60 * time.Second
 )
 
 func publish(amqpURI, exchange, routingKey, body string, reliable bool) error {
@@ -152,7 +155,7 @@ func main() {
 	publishKey := flag.String("publish_key", "", "AMQP routing key")
 	flag.Parse()
 
-	querier := gosnmpquerier.NewAsyncQuerier(CONTENTION)
+	querier := gosnmpquerier.NewAsyncQuerier(CONTENTION, CIRCUIT_BREAKER_ERRORS, CIRCUIT_BREAKER_RESETTIME)
 	go dispatchFromAmqpToInput(querier.Input, *amqpUri, *sourceExchange, *queue, *bindingKey)
 	publishResults(querier.Output, *amqpUri, *destinationExchange, *publishKey)
 }

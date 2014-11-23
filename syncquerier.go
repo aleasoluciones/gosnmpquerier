@@ -18,14 +18,14 @@ type SyncQuerier interface {
 }
 
 type syncQuerier struct {
-	Input          chan QueryWithOutputChannel
-	asyncQuerier   *AsyncQuerier
+	Input        chan QueryWithOutputChannel
+	asyncQuerier *AsyncQuerier
 }
 
 func NewSyncQuerier(contention, numErrors int, resetTime time.Duration) *syncQuerier {
 	querier := syncQuerier{
-		Input:          make(chan QueryWithOutputChannel),
-		asyncQuerier:   NewAsyncQuerier(contention),
+		Input:        make(chan QueryWithOutputChannel),
+		asyncQuerier: NewAsyncQuerier(contention, numErrors, resetTime),
 	}
 	go querier.processAndDispatchQueries()
 	return &querier
