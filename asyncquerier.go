@@ -29,7 +29,7 @@ func NewAsyncQuerier(contention int) *AsyncQuerier {
 	return &querier
 }
 
-type destinationProcessorInfo struct {
+type destinationProcessor struct {
 	input  chan Query
 	output chan Query
 	done   chan bool
@@ -37,7 +37,7 @@ type destinationProcessorInfo struct {
 
 func (querier *AsyncQuerier) process() {
 	log.Println("AsyncQuerier process begin")
-	m := make(map[string]destinationProcessorInfo)
+	m := make(map[string]destinationProcessor)
 
 	for query := range querier.Input {
 		if _, exists := m[query.Destination]; exists == false {
@@ -53,26 +53,23 @@ func (querier *AsyncQuerier) process() {
 	log.Println("closing output")
 	close(querier.Output)
 }
-func createProcessorInfo(output chan Query) destinationProcessorInfo {
-	return destinationProcessorInfo{
+func createProcessorInfo(output chan Query) destinationProcessor {
+	return destinationProcessor{
 		input:  make(chan Query, 10),
 		output: output,
 		done:   make(chan bool, 1),
 	}
 }
 
-func createProcessors(processorInfo destinationProcessorInfo, querier *AsyncQuerier, destination string) {
+func createProcessors(processorInfo destinationProcessor, querier *AsyncQuerier, destination string) {
 	for i := 0; i < querier.Contention; i++ {
-		go processQueriesFromChannel(
+		go processorInfo.processQueriesFromChannel(
 			querier,
-			processorInfo.input,
-			processorInfo.output,
-			processorInfo.done,
 			string(destination)+string("_")+strconv.Itoa(i))
 	}
 }
 
-func waitUntilProcessorEnd(m map[string]destinationProcessorInfo, contention int) {
+func waitUntilProcessorEnd(m map[string]destinationProcessor, contention int) {
 	for destination, processorInfo := range m {
 		log.Println("closing:", processorInfo.input)
 		close(processorInfo.input)
@@ -98,11 +95,11 @@ func (querier *AsyncQuerier) handleQuery(query *Query) {
 	}
 }
 
-func processQueriesFromChannel(querier *AsyncQuerier, input chan Query, processed chan Query, done chan bool, processorId string) {
-	for query := range input {
+func (processor * destinationProcessor) processQueriesFromChannel(querier *AsyncQuerier, processorId string) {
+	for query := range processor.input {
 		querier.handleQuery(&query)
-		processed <- query
+		processor.output <- query
 	}
-	done <- true
+	processor.done <- true
 	log.Println(processorId, "terminated")
 }
