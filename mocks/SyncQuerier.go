@@ -19,7 +19,7 @@ func (m *SyncQuerier) ExecuteQuery(query gosnmpquerier.Query) gosnmpquerier.Quer
 	return r0
 }
 func (m *SyncQuerier) Get(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
-	ret := m.Called(destination, oids, timeout, retries)
+	ret := m.Called(destination, community, oids, timeout, retries)
 
 	r0 := ret.Get(0).([]gosnmp.SnmpPDU)
 	r1 := ret.Error(1)
@@ -27,7 +27,7 @@ func (m *SyncQuerier) Get(destination, community string, oids []string, timeout 
 	return r0, r1
 }
 func (m *SyncQuerier) GetNext(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
-	ret := m.Called(destination, oids, timeout, retries)
+	ret := m.Called(destination, community, oids, timeout, retries)
 
 	r0 := ret.Get(0).([]gosnmp.SnmpPDU)
 	r1 := ret.Error(1)
