@@ -5,6 +5,7 @@
 package gosnmpquerier
 
 import (
+	"errors"
 	"time"
 
 	"github.com/soniah/gosnmp"
@@ -33,7 +34,13 @@ func NewSyncQuerier(contention, numErrors int, resetTime time.Duration) *syncQue
 
 func (querier *syncQuerier) ExecuteQuery(query Query) Query {
 	output := make(chan Query)
-	querier.Input <- QueryWithOutputChannel{query, output}
+
+	select {
+	case querier.Input <- QueryWithOutputChannel{query, output}:
+	case <-time.After(1 * time.Millisecond):
+		query.Error = errors.New("ExecuteQuery error to much queued queries")
+		return query
+	}
 	return <-output
 }
 
