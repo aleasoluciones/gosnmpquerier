@@ -11,6 +11,10 @@ import (
 	"github.com/soniah/gosnmp"
 )
 
+const (
+	QUERIER_TIMEOUT = 1 * time.Second
+)
+
 type SyncQuerier interface {
 	ExecuteQuery(query Query) Query
 	Get(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error)
@@ -37,8 +41,8 @@ func (querier *syncQuerier) ExecuteQuery(query Query) Query {
 
 	select {
 	case querier.Input <- QueryWithOutputChannel{query, output}:
-	case <-time.After(1 * time.Millisecond):
-		query.Error = errors.New("ExecuteQuery error to much queued queries")
+	case <-time.After(QUERIER_TIMEOUT):
+		query.Error = errors.New("Global queries queue full")
 		return query
 	}
 	return <-output

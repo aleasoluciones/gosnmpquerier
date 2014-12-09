@@ -5,12 +5,18 @@
 package gosnmpquerier
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strconv"
 	"time"
 
 	"github.com/aleasoluciones/goaleasoluciones/circuitbreaker"
+)
+
+const (
+	GLOBAL_QUEUE_SIZE      = 1024
+	DESTINATION_QUEUE_SIZE = 1024
 )
 
 type AsyncQuerier struct {
@@ -24,8 +30,8 @@ type AsyncQuerier struct {
 
 func NewAsyncQuerier(contention int, numErrors int, resetTime time.Duration) *AsyncQuerier {
 	querier := AsyncQuerier{
-		Input:      make(chan Query, 10),
-		Output:     make(chan Query, 10),
+		Input:      make(chan Query, GLOBAL_QUEUE_SIZE),
+		Output:     make(chan Query, GLOBAL_QUEUE_SIZE),
 		Contention: contention,
 		snmpClient: newSnmpClient(),
 		numErrors:  numErrors,
@@ -53,7 +59,13 @@ func (querier *AsyncQuerier) process() {
 			m[query.Destination] = processorInfo
 			createProcessors(processorInfo, query.Destination)
 		}
-		m[query.Destination].input <- query
+		select {
+		case m[query.Destination].input <- query:
+		case <-time.After(QUERIER_TIMEOUT):
+			query.Error = errors.New("Destination queue full")
+			querier.Output <- query
+		}
+
 	}
 	log.Println("AsyncQuerier process terminating")
 
@@ -65,7 +77,7 @@ func createProcessorInfo(querier *AsyncQuerier, output chan Query) destinationPr
 
 	return destinationProcessor{
 		querier:        querier,
-		input:          make(chan Query, 10),
+		input:          make(chan Query, DESTINATION_QUEUE_SIZE),
 		output:         output,
 		done:           make(chan bool, 1),
 		circuitBreaker: circuitbreaker.NewCircuit(querier.numErrors, querier.resetTime),
@@ -116,9 +128,17 @@ func (processor *destinationProcessor) handleQuery(query *Query) {
 }
 
 func (processor *destinationProcessor) processQueriesFromChannel(processorId string) {
-	for query := range processor.input {
-		processor.handleQuery(&query)
-		processor.output <- query
+	for {
+		select {
+		case query, more := <-processor.input:
+			if more {
+				log.Println("Processing query for ", query.Destination, " pending ", more)
+				processor.handleQuery(&query)
+				processor.output <- query
+			} else {
+				break
+			}
+		}
 	}
 	processor.done <- true
 	log.Println(processorId, "terminated")
