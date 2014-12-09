@@ -132,7 +132,7 @@ func (processor *destinationProcessor) processQueriesFromChannel(processorId str
 		select {
 		case query, more := <-processor.input:
 			if more {
-				log.Println("Processing query for ", query.Destination, " pending ", more)
+				log.Println("Processing query for ", query.Destination, " pending ", len(processor.input))
 				processor.handleQuery(&query)
 				processor.output <- query
 			} else {
