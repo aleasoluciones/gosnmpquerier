@@ -3,10 +3,21 @@
 [![Build Status](https://travis-ci.org/aleasoluciones/gosnmpquerier.svg?branch=master)](https://travis-ci.org/aleasoluciones/gosnmpquerier)
 [![Coverage Status](https://img.shields.io/coveralls/aleasoluciones/gosnmpquerier.svg)](https://coveralls.io/r/aleasoluciones/gosnmpquerier?branch=master)
 
-Asynchronous and Synchronous scalable snmpquerier with a maximum number
-of concurrent snmp queries for each ip/host.
+Scalable SNMP querier library
 
-Support for Walk/Get/GetNext SNMP Queries
+## Features
+ * Asynchronous and Synchronous scalable snmpquerier
+ * Support for Walk/Get/GetNext snmp queries
+ * Maximum number of concurrent snmp queries for each device/host (Contention).
+ * Circuit Breaker pattern for each device/host connection
+ * Back preasure control for each device/host incomming queries
+ * Back preasure control for global incomming queries
+
+##  Unimplemented features / TODO
+ * Contention level configured for each device/host
+ * Back preasure configuration
+ * Set snmp command
+ 
 
 ## Installation
 
