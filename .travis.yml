@@ -15,4 +15,5 @@ install:
   - go build -v .
 
 script:
+  - go test -v
   - $HOME/gopath/bin/goveralls -repotoken 0A8ycTAs0NU3E8rureuBUPzgHbpZ1qZA5
