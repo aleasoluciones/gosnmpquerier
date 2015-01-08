@@ -3,16 +3,12 @@ go:
  - 1.4
 
 before_install:
-  - go get github.com/soniah/gosnmp
-  - go get github.com/stretchr/testify/assert
-  - go get github.com/axw/gocov/gocov
-  - go get github.com/mattn/goveralls
-  - go get golang.org/x/tools/cmd/cover
+  - make deps
 
 install:
-  - go get -d -v .
-  - go build -v .
+  - make deps
+  - make build
 
 script:
-  - go test -v
+  - make test
   - $HOME/gopath/bin/goveralls -repotoken 0A8ycTAs0NU3E8rureuBUPzgHbpZ1qZA5

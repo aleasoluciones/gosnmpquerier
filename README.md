@@ -17,7 +17,7 @@ Scalable SNMP querier library
  * Contention level configured for each device/host
  * Back preasure configuration
  * Set snmp command
- 
+
 
 ## Installation
 
@@ -34,7 +34,7 @@ import "github.com/aleasoluciones/gosnmpquerier"
 ## Testing
 
 ```
-$ go test -v
+$ make test
 ```
 
 ##License
