@@ -6,7 +6,6 @@ before_install:
   - make deps
 
 install:
-  - make deps
   - make build
 
 script:
