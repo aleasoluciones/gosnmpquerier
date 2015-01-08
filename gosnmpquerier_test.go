@@ -11,18 +11,18 @@ import (
 type FakeSnmpClient struct{}
 
 func (snmpClient *FakeSnmpClient) get(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
-	return makeSnmpPDu()
+	return makeSnmpPDU()
 }
 
 func (snmpClient *FakeSnmpClient) walk(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
-	return makeSnmpPDu()
+	return makeSnmpPDU()
 }
 
 func (snmpClient *FakeSnmpClient) getnext(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
-	return makeSnmpPDu()
+	return makeSnmpPDU()
 }
 
-func makeSnmpPDu() ([]gosnmp.SnmpPDU, error) {
+func makeSnmpPDU() ([]gosnmp.SnmpPDU, error) {
 	return []gosnmp.SnmpPDU{gosnmp.SnmpPDU{Name: "foo", Type: 1, Value: 1}}, nil
 }
 
@@ -35,6 +35,7 @@ func newSyncQuerier() *syncQuerier {
 func expectedSnmpResult() []gosnmp.SnmpPDU {
 	return []gosnmp.SnmpPDU{gosnmp.SnmpPDU{Name: "foo", Type: 0x1, Value: 1}}
 }
+
 func TestGetReturnsSnmpGetResult(t *testing.T) {
 	querier := newSyncQuerier()
 	result, _ := querier.Get("192.168.5.15", "alea2", []string{"1.3.6.1.2.1.1.1.0"}, 1*time.Second, 1)
