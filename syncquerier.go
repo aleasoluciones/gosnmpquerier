@@ -39,12 +39,18 @@ func NewSyncQuerier(contention, numErrors int, resetTime time.Duration) *syncQue
 func (querier *syncQuerier) ExecuteQuery(query Query) Query {
 	output := make(chan Query)
 
+	timeoutTimer := time.NewTimer(QUERIER_TIMEOUT)
+	defer timeoutTimer.Stop()
+
 	select {
 	case querier.Input <- QueryWithOutputChannel{query, output}:
-	case <-time.After(QUERIER_TIMEOUT):
+
+	// Same as time.After() but prevents memory leaks by manually stopping the timer
+	case <-timeoutTimer.C:
 		query.Error = errors.New("Global queries queue full")
 		return query
 	}
+
 	return <-output
 }
 

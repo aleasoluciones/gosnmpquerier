@@ -51,7 +51,11 @@ type destinationProcessor struct {
 
 func (querier *AsyncQuerier) process() {
 	log.Println("AsyncQuerier process begin")
+
 	m := make(map[string]destinationProcessor)
+
+	timeoutTimer := time.NewTimer(QUERIER_TIMEOUT)
+	defer timeoutTimer.Stop()
 
 	for query := range querier.Input {
 		if _, exists := m[query.Destination]; exists == false {
@@ -59,9 +63,12 @@ func (querier *AsyncQuerier) process() {
 			m[query.Destination] = processorInfo
 			createProcessors(processorInfo, query.Destination)
 		}
+
 		select {
 		case m[query.Destination].input <- query:
-		case <-time.After(QUERIER_TIMEOUT):
+
+		// Same as time.After() but prevents memory leaks by manually stopping the timer
+		case <-timeoutTimer.C:
 			query.Error = errors.New("Destination queue full")
 			querier.Output <- query
 		}
