@@ -56,6 +56,7 @@ func (querier *AsyncQuerier) process() {
 
 	timeoutTimer := time.NewTimer(QUERIER_TIMEOUT)
 	defer timeoutTimer.Stop()
+	afterTimeout := timeoutTimer.C
 
 	for query := range querier.Input {
 		if _, exists := m[query.Destination]; exists == false {
@@ -66,13 +67,10 @@ func (querier *AsyncQuerier) process() {
 
 		select {
 		case m[query.Destination].input <- query:
-
-		// Same as time.After() but prevents memory leaks by manually stopping the timer
-		case <-timeoutTimer.C:
+		case <-afterTimeout:
 			query.Error = errors.New("Destination queue full")
 			querier.Output <- query
 		}
-
 	}
 	log.Println("AsyncQuerier process terminating")
 
