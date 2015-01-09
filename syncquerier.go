@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	QUERIER_TIMEOUT = 1 * time.Second
+	QUERIER_TIMEOUT = 2 * time.Second
 )
 
 type SyncQuerier interface {
