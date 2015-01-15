@@ -131,6 +131,7 @@ func (processor *destinationProcessor) handleQuery(query *Query) {
 		}
 
 		if query.Error != nil {
+			log.Println("[gosnmpquerier] query error", query.Error)
 			processor.circuitBreaker.Error()
 		} else {
 			processor.circuitBreaker.Ok()
