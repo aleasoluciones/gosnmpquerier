@@ -1,7 +1,7 @@
-build: deps
+build:
 	go build -v .
 
-test: deps
+test:
 	go test -v
 
 deps:
