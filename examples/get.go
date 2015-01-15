@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	community := flag.String("community", "puiblic", "snmp v2 community")
+	community := flag.String("community", "public", "snmp v2 community")
 	host := flag.String("host", "127.0.0.1", "host")
 
 	flag.Usage = func() {
