@@ -54,30 +54,36 @@ func (querier *AsyncQuerier) process() {
 
 	m := make(map[string]destinationProcessor)
 
-	timeoutTimer := time.NewTimer(QUERIER_TIMEOUT)
-	defer timeoutTimer.Stop()
-	afterTimeout := timeoutTimer.C
-
 	for query := range querier.Input {
-		if _, exists := m[query.Destination]; exists == false {
-			processorInfo := createProcessorInfo(querier, querier.Output)
-			m[query.Destination] = processorInfo
-			createProcessors(processorInfo, query.Destination)
-		}
-
-		select {
-		case m[query.Destination].input <- query:
-		case <-afterTimeout:
-			query.Error = errors.New("Destination queue full")
-			querier.Output <- query
-		}
+		querier.processQuery(query, m)
 	}
+
 	log.Println("AsyncQuerier process terminating")
 
 	waitUntilProcessorEnd(m, querier.Contention)
 	log.Println("closing output")
 	close(querier.Output)
 }
+
+func (querier *AsyncQuerier) processQuery(query Query, m map[string]destinationProcessor) {
+	if _, exists := m[query.Destination]; exists == false {
+		processorInfo := createProcessorInfo(querier, querier.Output)
+		m[query.Destination] = processorInfo
+		createProcessors(processorInfo, query.Destination)
+	}
+
+	timeoutTimer := time.NewTimer(QUERIER_TIMEOUT)
+	defer timeoutTimer.Stop()
+	afterTimeout := timeoutTimer.C
+
+	select {
+	case m[query.Destination].input <- query:
+	case <-afterTimeout:
+		query.Error = errors.New("Destination queue full")
+		querier.Output <- query
+	}
+}
+
 func createProcessorInfo(querier *AsyncQuerier, output chan Query) destinationProcessor {
 
 	return destinationProcessor{
