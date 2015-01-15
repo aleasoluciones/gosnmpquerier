@@ -12,6 +12,8 @@ import (
 func main() {
 	community := flag.String("community", "public", "snmp v2 community")
 	host := flag.String("host", "127.0.0.1", "host")
+	timeout := flag.Duration("timeout", 1*time.Second, "Timeout (ms/s/m/h)")
+	retries := flag.Int("retries", 1, "Retries")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s: [options] [[oid] ...]\n", os.Args[0])
@@ -26,6 +28,6 @@ func main() {
 	}
 
 	querier := gosnmpquerier.NewSyncQuerier(1, 3, 3*time.Second)
-	result, err := querier.Get(*host, *community, oids, 1*time.Second, 1)
+	result, err := querier.Get(*host, *community, oids, *timeout, *retries)
 	fmt.Println(result, err)
 }
