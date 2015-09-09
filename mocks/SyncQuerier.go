@@ -35,7 +35,7 @@ func (m *SyncQuerier) GetNext(destination, community string, oids []string, time
 	return r0, r1
 }
 func (m *SyncQuerier) Walk(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
-	ret := m.Called(destination, timeout, retries)
+	ret := m.Called(destination, community, oid, timeout, retries)
 
 	r0 := ret.Get(0).([]gosnmp.SnmpPDU)
 	r1 := ret.Error(1)
