@@ -5,6 +5,7 @@
 package gosnmpquerier
 
 import (
+	"log"
 	"time"
 
 	"github.com/soniah/gosnmp"
@@ -23,6 +24,7 @@ func newSnmpClient() *GoSnmpClient {
 }
 
 func (snmpClient *GoSnmpClient) get(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+	t1 := time.Now()
 	conn := snmpConnection(destination, community, timeout, retries)
 	if err := conn.Connect(); err != nil {
 		return nil, err
@@ -38,18 +40,22 @@ func (snmpClient *GoSnmpClient) get(destination, community string, oids []string
 	for _, pdu := range result.Variables {
 		pdus = append(pdus, pdu)
 	}
+	log.Println("get time", time.Since(t1), "data", destination, oids)
 	return pdus, nil
 
 }
 
 func (snmpClient *GoSnmpClient) walk(destination, community, oid string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+	t1 := time.Now()
 	conn := snmpConnection(destination, community, timeout, retries)
 	if err := conn.Connect(); err != nil {
 		return nil, err
 	}
 	defer conn.Conn.Close()
 
-	return conn.BulkWalkAll(oid)
+	result, err := conn.BulkWalkAll(oid)
+	log.Println("walk time", time.Since(t1), "data", destination, oid)
+	return result, err
 }
 
 func snmpConnection(destination, community string, timeout time.Duration, retries int) gosnmp.GoSNMP {
@@ -64,6 +70,7 @@ func snmpConnection(destination, community string, timeout time.Duration, retrie
 }
 
 func (snmpClient *GoSnmpClient) getnext(destination, community string, oids []string, timeout time.Duration, retries int) ([]gosnmp.SnmpPDU, error) {
+	t1 := time.Now()
 	conn := snmpConnection(destination, community, timeout, retries)
 	if err := conn.Connect(); err != nil {
 		return nil, err
@@ -79,5 +86,6 @@ func (snmpClient *GoSnmpClient) getnext(destination, community string, oids []st
 	for _, pdu := range result.Variables {
 		pdus = append(pdus, pdu)
 	}
+	log.Println("getnext time", time.Since(t1), "data", destination, oids)
 	return pdus, nil
 }
