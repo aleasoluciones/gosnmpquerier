@@ -5,12 +5,6 @@ go:
  - 1.6
  - tip
 
-before_install:
-  - make deps
-
-install:
-  - make build
-
 script:
-  - make test
+  - make all
   - $HOME/gopath/bin/goveralls -repotoken 0A8ycTAs0NU3E8rureuBUPzgHbpZ1qZA5
