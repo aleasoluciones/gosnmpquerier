@@ -147,10 +147,10 @@ func (processor *destinationProcessor) processQueriesFromChannel(processorId str
 				processor.handleQuery(&query)
 				processor.output <- query
 			} else {
+				processor.done <- true
+				log.Println(processorId, "terminated")
 				break
 			}
 		}
 	}
-	processor.done <- true
-	log.Println(processorId, "terminated")
 }
