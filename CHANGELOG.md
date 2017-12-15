@@ -1,6 +1,6 @@
 2017-12-15
 ==========
-* Internal: Removed go version 1.6 and 1.7. Added 1.8.x, 1.9.x and master versions
+* Internal: Removed go version 1.6 and 1.7. Added 1.8.x, 1.9.x versions. Master versions is not used because go vet fails :-( (pending to review)
 
 2016-10-26
 ==========
