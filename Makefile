@@ -1,22 +1,32 @@
-all: update_deps build test
+all: test
 
-deps:
+jenkins: install_dep_tool install_go_linter production_restore_deps test
+
+install_dep_tool:
+	go get github.com/tools/godep
+
+install_go_linter:
+	go get -u -v github.com/golang/lint/golint
+
+initialize_deps:
 	go get -d -v ./...
 	go get -d -v github.com/stretchr/testify/assert
 	go get -v github.com/golang/lint/golint
+	godep save
 
 update_deps:
-	go get -d -v -u ./...
-	go get -d -v -u github.com/stretchr/testify/assert
-	go get -v -u github.com/golang/lint/golint
+	godep go get -d -v ./...
+	godep go get -d -v github.com/stretchr/testify/assert
+	godep go get -v github.com/golang/lint/golint
+	godep update ./...
 
 test:
 	golint ./...
-	go vet ./...
-	go test -v
+	godep go vet ./...
+	godep go test -v
 
-build:
-	go build -v .
+production_restore_deps:
+	godep restore
 
-.PHONY: deps update_deps test build
+.PHONY: install_dep_tool install_go_linter initialize_deps update_deps test production_restore_deps
 

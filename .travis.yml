@@ -6,4 +6,4 @@ go:
 sudo: false
 
 script:
-  - make all
+  - make jenkins

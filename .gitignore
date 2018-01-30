@@ -26,3 +26,6 @@ _testmain.go
 ### Intellij ###
 .idea/
 /*.iml
+
+# Exclude vendor directory (godep dependency manager tool)
+vendor

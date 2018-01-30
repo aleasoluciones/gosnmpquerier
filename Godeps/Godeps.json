@@ -1,0 +1,31 @@
+{
+	"ImportPath": "github.com/aleasoluciones/gosnmpquerier",
+	"GoVersion": "go1.9",
+	"GodepVersion": "v79",
+	"Deps": [
+		{
+			"ImportPath": "github.com/aleasoluciones/goaleasoluciones/circuitbreaker",
+			"Rev": "70d408b97bd19730dc5803590e3b7f0bba6167d1"
+		},
+		{
+			"ImportPath": "github.com/davecgh/go-spew/spew",
+			"Comment": "v1.1.0-9-gecdeabc",
+			"Rev": "ecdeabc65495df2dec95d7c4a4c3e021903035e5"
+		},
+		{
+			"ImportPath": "github.com/pmezard/go-difflib/difflib",
+			"Comment": "v1.0.0",
+			"Rev": "792786c7400a136282c1664665ae0a8db921c6c2"
+		},
+		{
+			"ImportPath": "github.com/soniah/gosnmp",
+			"Comment": "v1.9-memory-4-gbe22ca7",
+			"Rev": "be22ca71ca88bccb2b078622d6355884a81853e9"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/assert",
+			"Comment": "v1.1.4-72-g2aa2c17",
+			"Rev": "2aa2c176b9dab406a6970f6a55f513e8a8c8b18f"
+		}
+	]
+}
