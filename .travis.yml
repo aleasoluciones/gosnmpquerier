@@ -7,3 +7,7 @@ sudo: false
 
 script:
   - make jenkins
+
+notifications:
+  email:
+  - bifer@alea-soluciones.com
