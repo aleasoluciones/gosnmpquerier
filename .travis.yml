@@ -6,7 +6,7 @@ go:
 sudo: false
 
 script:
-  - go install github.com/streadway/amqp
+  - go get github.com/streadway/amqp
   - make jenkins
 
 notifications:
