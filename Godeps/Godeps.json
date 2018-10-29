@@ -5,7 +5,7 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/aleasoluciones/goaleasoluciones/circuitbreaker",
-			"Rev": "70d408b97bd19730dc5803590e3b7f0bba6167d1"
+			"Rev": "17fbb1e0731dd5d72694f7b89d30a01680e131c1"
 		},
 		{
 			"ImportPath": "github.com/davecgh/go-spew/spew",
@@ -24,6 +24,16 @@
 		},
 		{
 			"ImportPath": "github.com/stretchr/testify/assert",
+			"Comment": "v1.1.4-72-g2aa2c17",
+			"Rev": "2aa2c176b9dab406a6970f6a55f513e8a8c8b18f"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/vendor/github.com/davecgh/go-spew/spew",
+			"Comment": "v1.1.4-72-g2aa2c17",
+			"Rev": "2aa2c176b9dab406a6970f6a55f513e8a8c8b18f"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/vendor/github.com/pmezard/go-difflib/difflib",
 			"Comment": "v1.1.4-72-g2aa2c17",
 			"Rev": "2aa2c176b9dab406a6970f6a55f513e8a8c8b18f"
 		}
