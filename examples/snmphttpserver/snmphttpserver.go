@@ -1,4 +1,4 @@
-package main
+package snmphttpserver
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ const (
 	CONTENTION = 4
 )
 
-func rootHandler(querier *gosnmpquerier.SyncQuerier, w http.ResponseWriter, r *http.Request) {
+func rootHandler(querier gosnmpquerier.SyncQuerier, w http.ResponseWriter, r *http.Request) {
 
 	cmd, _ := gosnmpquerier.ConvertCommand(r.FormValue("cmd"))
 	query := gosnmpquerier.Query{

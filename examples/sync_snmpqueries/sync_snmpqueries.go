@@ -2,7 +2,7 @@
 // source code is governed by a MIT-style license that can be found in the
 // LICENSE file.
 
-package main
+package sync_snmpqueries
 
 import (
 	"fmt"
