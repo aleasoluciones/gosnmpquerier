@@ -15,9 +15,9 @@ initialize_deps:
 	godep save
 
 update_deps:
-	godep go get -d -v ./...
-	godep go get -d -v github.com/stretchr/testify/assert
-	godep go get -v github.com/golang/lint/golint
+	godep go install -v ./...
+	godep go install -v github.com/stretchr/testify/assert
+	godep go install -v golang.org/x/lint/golint
 	godep update ./...
 
 test:
