@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/aleasoluciones/gosnmpquerier",
-	"GoVersion": "go1.9",
+	"GoVersion": "go1.11",
 	"GodepVersion": "v80",
 	"Deps": [
 		{
