@@ -1,4 +1,4 @@
-package snmphttpserver
+package main
 
 import (
 	"fmt"
@@ -8,6 +8,12 @@ import (
 
 	"github.com/aleasoluciones/gosnmpquerier"
 )
+
+// Example of execution
+// Run the http server
+//		go run examples/snmphttpserver/snmphttpserver.go
+// curl a request
+//		curl http://127.0.0.1:8080 -X PUT  -H 'Content-Type: multipart/form-data' -d '{"cmd":"walk", "destination":"MY_HOST_IP", "community":"MY_COMMUNITY", "oid":["AN_OID"]}'
 
 const (
 	CONTENTION = 4

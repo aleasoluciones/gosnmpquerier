@@ -1,4 +1,4 @@
-package walk
+package main
 
 import (
 	"flag"

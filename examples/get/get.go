@@ -1,4 +1,4 @@
-package get
+package main
 
 import (
 	"flag"
@@ -8,6 +8,9 @@ import (
 
 	"github.com/aleasoluciones/gosnmpquerier"
 )
+
+// Example of execution
+// go run examples/get/get.go -community MY_COMMUNITY -host MY_HOST_IP  AN_OID
 
 func main() {
 	community := flag.String("community", "public", "snmp v2 community")

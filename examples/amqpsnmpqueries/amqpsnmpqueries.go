@@ -1,4 +1,4 @@
-package amqpsnmpqueries
+package main
 
 import (
 	"flag"

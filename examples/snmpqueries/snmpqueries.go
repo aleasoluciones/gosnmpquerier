@@ -2,7 +2,7 @@
 // source code is governed by a MIT-style license that can be found in the
 // LICENSE file.
 
-package snmpqueries
+package main
 
 import (
 	"bufio"
@@ -12,6 +12,11 @@ import (
 
 	"github.com/aleasoluciones/gosnmpquerier"
 )
+
+// Example of execution
+//	go run examples/snmpqueries/snmpqueries.go
+// The programs wait to a json input from command line
+//	{"command":"walk", "destination":"MY_HOST_IP", "community":"MY_COMMUNITY", "oids":["AN_OID"]}
 
 const (
 	CONTENTION = 4
