@@ -6,6 +6,11 @@ go:
 
 sudo: false
 
+# safelist branch to build
+branches:
+  only:
+    - master
+
 script:
   - go get github.com/streadway/amqp
   - make jenkins
