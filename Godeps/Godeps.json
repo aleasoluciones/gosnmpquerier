@@ -5,7 +5,7 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/aleasoluciones/goaleasoluciones/circuitbreaker",
-			"Rev": "17fbb1e0731dd5d72694f7b89d30a01680e131c1"
+			"Rev": "b0f5cadff0cbc918dd386f061e9fa37f0ce73d13"
 		},
 		{
 			"ImportPath": "github.com/davecgh/go-spew/spew",
