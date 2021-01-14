@@ -8,7 +8,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/soniah/gosnmp"
+	"github.com/gosnmp/gosnmp"
 )
 
 const (

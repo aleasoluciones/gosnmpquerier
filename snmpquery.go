@@ -7,7 +7,7 @@ package gosnmpquerier
 import (
 	"time"
 
-	"github.com/soniah/gosnmp"
+	"github.com/gosnmp/gosnmp"
 )
 
 type OpSnmp int32

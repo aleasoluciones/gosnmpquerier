@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/soniah/gosnmp"
+	"github.com/gosnmp/gosnmp"
 )
 
 type queryMessage struct {

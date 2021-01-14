@@ -5,7 +5,7 @@ import "github.com/stretchr/testify/mock"
 
 import "time"
 
-import "github.com/soniah/gosnmp"
+import "github.com/gosnmp/gosnmp"
 
 type SyncQuerier struct {
 	mock.Mock
