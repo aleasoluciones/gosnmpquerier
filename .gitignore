@@ -27,5 +27,8 @@ _testmain.go
 .idea/
 /*.iml
 
+### vim ###
+tags
+
 # Exclude vendor directory (godep dependency manager tool)
 vendor
