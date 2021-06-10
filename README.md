@@ -1,6 +1,6 @@
 # GoSNMPQuerier
 
-[![Build Status](https://travis-ci.org/aleasoluciones/gosnmpquerier.svg?branch=master)](https://travis-ci.org/aleasoluciones/gosnmpquerier)
+[![Build Status](https://travis-ci.com/aleasoluciones/gosnmpquerier.svg?branch=master)](https://travis-ci.com/aleasoluciones/gosnmpquerier)
 [![Coverage Status](https://img.shields.io/coveralls/aleasoluciones/gosnmpquerier.svg)](https://coveralls.io/r/aleasoluciones/gosnmpquerier?branch=master)
 
 Scalable SNMP querier library
