@@ -32,3 +32,11 @@ tags
 
 # Exclude vendor directory (godep dependency manager tool)
 vendor
+
+# binaries
+amqpsnmpqueries
+get
+snmphttpserver
+snmpqueries
+sync_snmpqueries
+walk

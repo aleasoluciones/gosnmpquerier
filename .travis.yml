@@ -1,19 +1,20 @@
+os: linux
+
+dist: focal
+
 language: go
+
 go:
- - 1.11.x
- - 1.17.x
+  - 1.17.x
 
-sudo: false
-
-# safelist branch to build
 branches:
   only:
     - master
 
 script:
-  - go get github.com/streadway/amqp
-  - make jenkins
+  - make build
+  - make test
 
 notifications:
   email:
-  - bifer@alea-soluciones.com
+    - bifer@alea-soluciones.com

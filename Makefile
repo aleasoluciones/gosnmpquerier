@@ -1,32 +1,37 @@
-all: test
+all: clean build test
 
-jenkins: install_dep_tool install_go_linter production_restore_deps test
+update_dep:
+	go get $(DEP)
+	go mod tidy
 
-install_dep_tool:
-	go get github.com/tools/godep
+update_all_deps:
+	go get -u
+	go mod tidy
 
-install_go_linter:
-	go get -u -v golang.org/x/lint/golint
-
-initialize_deps:
-	go get -d -v ./...
-	go get -d -v github.com/stretchr/testify/assert
-	go get -v golang.org/x/lint/golint
-	godep save
-
-update_deps:
-	godep go install -v ./...
-	godep go install -v github.com/stretchr/testify/assert
-	godep go install -v golang.org/x/lint/golint
-	godep update ./...
+format:
+	go fmt ./...
 
 test:
-	golint ./...
-	godep go vet ./...
-	godep go test -v
+	go vet ./...
+	go clean -testcache
+	go test -v ./...
 
-production_restore_deps:
-	godep restore
+build:
+	go build examples/amqpsnmpqueries/amqpsnmpqueries.go
+	go build examples/get/get.go
+	go build examples/snmphttpserver/snmphttpserver.go
+	go build examples/snmpqueries/snmpqueries.go
+	go build examples/sync_snmpqueries/sync_snmpqueries.go
+	go build examples/walk/walk.go
 
-.PHONY: install_dep_tool install_go_linter initialize_deps update_deps test production_restore_deps
+clean:
+	rm -f amqpsnmpqueries
+	rm -f get
+	rm -f snmphttpserver
+	rm -f snmpqueries
+	rm -f sync_snmpqueries
+	rm -f walk
+
+
+.PHONY: update_dep update_all_deps format test build clean
 

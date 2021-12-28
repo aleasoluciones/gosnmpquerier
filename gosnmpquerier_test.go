@@ -23,7 +23,7 @@ func (snmpClient *FakeSnmpClient) getnext(destination, community string, oids []
 }
 
 func makeSnmpPDU() ([]gosnmp.SnmpPDU, error) {
-	return []gosnmp.SnmpPDU{gosnmp.SnmpPDU{Name: "foo", Type: 1, Value: 1}}, nil
+	return []gosnmp.SnmpPDU{{Name: "foo", Type: 1, Value: 1}}, nil
 }
 
 func newSyncQuerier() *syncQuerier {
@@ -33,7 +33,7 @@ func newSyncQuerier() *syncQuerier {
 }
 
 func expectedSnmpResult() []gosnmp.SnmpPDU {
-	return []gosnmp.SnmpPDU{gosnmp.SnmpPDU{Name: "foo", Type: 0x1, Value: 1}}
+	return []gosnmp.SnmpPDU{{Name: "foo", Type: 0x1, Value: 1}}
 }
 
 func TestGetReturnsSnmpGetResult(t *testing.T) {
