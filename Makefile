@@ -5,7 +5,7 @@ update_dep:
 	go mod tidy
 
 update_all_deps:
-	go get -u
+	go get -u all
 	go mod tidy
 
 format:
