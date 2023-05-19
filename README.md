@@ -1,6 +1,6 @@
 # gosnmpquerier
 
-[![Build Status](https://travis-ci.com/aleasoluciones/gosnmpquerier.svg?branch=master)](https://travis-ci.com/aleasoluciones/gosnmpquerier)
+[![CI](https://github.com/aleasoluciones/gosnmpquerier/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/aleasoluciones/gosnmpquerier/actions/workflows/ci.yml)
 [![Coverage Status](https://img.shields.io/coveralls/aleasoluciones/gosnmpquerier.svg)](https://coveralls.io/r/aleasoluciones/gosnmpquerier?branch=master)
 [![GoDoc](https://godoc.org/github.com/aleasoluciones/gosnmpquerier?status.png)](http://godoc.org/github.com/aleasoluciones/gosnmpquerier)
 [![License](https://img.shields.io/github/license/aleasoluciones/gosnmpquerier)](https://github.com/aleasoluciones/gosnmpquerier/blob/master/LICENSE)

@@ -1,4 +1,4 @@
-name: Gi
+name: CI
 
 on:
   push:
